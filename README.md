@@ -3,7 +3,7 @@
 `monaco-editor` 的 react 实现。核心源代码目录在 `src/monaco` ，其他代码皆为用于演示
 App 的代码。
 
-[react-monaco demo 演示](https://static.kephp.com/react-monaco/index.html)，第一次打开下载很慢（本身绕国外就慢），实际走 github 下载的，下载后保存到 indexeddb ，第二次打开就很快了。
+[react-monaco 演示](https://static.kephp.com/react-monaco/0.0.1/index.html)，第一次打开下载很慢（本身绕国外就慢），实际走 github 下载的，下载后保存到 indexeddb ，第二次打开就很快了。
 
 ## 更新日志
 
@@ -120,7 +120,7 @@ function App() {
   （可参考 [preset.ts](src/preset.ts)）
 - monaco 主题（明/暗）和 mui 主题（明/暗）联动（初始状态，基于 media query）
 
-[react-monaco demo 演示](https://static.kephp.com/react-monaco/index.html)，第一次打开下载很慢（本身绕国外就慢），实际走 github 下载的，下载后保存到 indexeddb ，第二次打开就很快了。
+[react-monaco 演示](https://static.kephp.com/react-monaco/0.0.1/index.html)，第一次打开下载很慢（本身绕国外就慢），实际走 github 下载的，下载后保存到 indexeddb ，第二次打开就很快了。
 
 ## 特别说明
 
