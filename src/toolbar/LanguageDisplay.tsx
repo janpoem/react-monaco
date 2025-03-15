@@ -1,4 +1,5 @@
-import { Typography, useTheme } from '@mui/material';
+import { Box, useTheme } from '@mui/material';
+import { fontMonospace } from '../preset';
 
 export type LanguageDisplayProps = {
   value: string;
@@ -8,14 +9,16 @@ export const LanguageDisplay = ({ value }: LanguageDisplayProps) => {
   const { palette } = useTheme();
 
   return (
-    <Typography
+    <Box
       sx={{
-        fontSize: '0.85em',
-        color: palette.action.active,
+        color: palette.primary[palette.mode],
+        fontFamily: fontMonospace,
         userSelect: 'none',
+        textTransform: 'capitalize',
+        letterSpacing: '-0.065em',
       }}
     >
       {value}
-    </Typography>
+    </Box>
   );
 };

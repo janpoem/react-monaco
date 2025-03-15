@@ -11,6 +11,7 @@ export const TopBar = ({ children }: TopBarProps) => {
     <Box
       display={'flex'}
       gap={'4px'}
+      alignItems={'center'}
       sx={{
         p: '4px',
         borderBottom: `1px solid ${palette.divider}`,

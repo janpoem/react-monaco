@@ -5,6 +5,8 @@ import {
   type MonacoProviderProps,
 } from './monaco';
 
+const baseUrl = 'https://static.summererp.com/misc';
+
 const labels = {
   editor: [],
   ts: ['typescript', 'javascript'],
@@ -13,6 +15,8 @@ const labels = {
   css: ['css', 'scss', 'less'],
 };
 
+export const biomeWasmUrl = `${baseUrl}/biome/1.9.4/biome_wasm_bg.wasm`;
+
 export const createMonacoProviderProps = (
   version = '0.52.2',
 ): MonacoProviderProps => {
@@ -20,7 +24,8 @@ export const createMonacoProviderProps = (
   let requiredAssets: MonacoPreloadAsset[] = [];
 
   return {
-    baseUrl: `https://static.kephp.com/libs/monaco-editor/${version}/`,
+    // baseUrl: `https://static.kephp.com/libs/monaco-editor/${version}/`,
+    baseUrl: `${baseUrl}/monaco-editor/${version}/`,
     // baseUrl: `http://localhost:8787/libs/monaco-editor/${version}/`,
     // baseUrl: `http://localhost:3002/${version}/`,
     // baseUrl: 'http://localhost:3000/monaco-editor',
@@ -31,13 +36,20 @@ export const createMonacoProviderProps = (
     handlePrepareAssets: async ({ preloadAssets }) => {
       requiredAssets = preloadAssets;
       queryKeys = preloadAssets.map((it) => [it.key, version]);
-      const keys = (
-        await db.sources
-          .where('[key+version]')
-          .anyOf(...queryKeys)
-          .toArray()
-      ).map((it) => it.key);
-      return preloadAssets.filter((it) => !keys.includes(it.key));
+
+      try {
+        const keys = (
+          await db.sources
+            .where('[key+version]')
+            .anyOf(...queryKeys)
+            .toArray()
+        ).map((it) => it.key);
+        return preloadAssets.filter((it) => !keys.includes(it.key));
+      } catch (err) {
+        console.warn('handlePrepareAssets', err);
+      }
+
+      return preloadAssets;
     },
     onPreload: async ({ queue, preloadAssets }) => {
       const tasks = queue.tasks;
@@ -74,7 +86,6 @@ export const createMonacoProviderProps = (
         .where('[key+version]')
         .anyOf(...queryKeys)
         .toArray();
-
       for (const cache of caches) {
         const blob = new Blob([cache.source], { type: mimeTypes.js });
         const blobUrl = URL.createObjectURL(blob);
@@ -91,9 +102,6 @@ export const createMonacoProviderProps = (
           });
         }
       }
-
-      queryKeys = [];
-      requiredAssets = [];
       return [remotes, workers];
     },
     // biome-ignore format: not formatter here

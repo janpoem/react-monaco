@@ -1,6 +1,7 @@
 export default {
   // @ts-ignore
-  filename: 'App.tsx.ts',
+  filename: 'App.tsx',
+  uri: 'App.tsx',
   source: `
 import './App.css';
 import { CssBaseline, ThemeProvider } from '@mui/material';

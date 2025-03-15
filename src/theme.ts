@@ -1,13 +1,24 @@
 import { createTheme as muiCreateTheme } from '@mui/material';
 import { grey } from '@mui/material/colors';
+import type { MonacoThemeColor } from './monaco';
 
-export const createTheme = (darkMode: boolean) =>
+export const createTheme = (
+  darkMode: boolean,
+  { primary, background, text }: MonacoThemeColor,
+) =>
   muiCreateTheme({
     palette: {
       mode: darkMode ? 'dark' : 'light',
+      primary: {
+        main: primary,
+      },
       text: {
-        primary: darkMode ? grey[400] : grey[700],
+        primary: text,
         secondary: grey[500],
+      },
+      background: {
+        default: background,
+        paper: background,
       },
     },
     spacing: 2,
@@ -39,7 +50,8 @@ export const createTheme = (darkMode: boolean) =>
       },
     },
     typography: {
-      fontSize: 12,
+      fontSize: 14,
+      htmlFontSize: 16,
       button: {
         textTransform: 'none',
       },

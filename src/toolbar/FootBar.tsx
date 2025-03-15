@@ -1,4 +1,4 @@
-import { Box, useTheme } from '@mui/material';
+import { Box } from '@mui/material';
 import type { ReactNode } from 'react';
 
 export type FootBarProps = {
@@ -6,11 +6,15 @@ export type FootBarProps = {
 };
 
 export const FootBar = ({ children }: FootBarProps) => {
-  const { palette } = useTheme();
   return (
     <Box
       display={'flex'}
-      sx={{ px: '0.5em', py: '4px', borderTop: `1px solid ${palette.divider}` }}
+      alignItems={'center'}
+      sx={{
+        px: '0.5em',
+        py: '4px',
+        fontSize: '0.85em',
+      }}
       gap={'0.5em'}
     >
       {children}

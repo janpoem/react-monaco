@@ -75,6 +75,7 @@ export type PresetLoaderProps<P = unknown> = {
   withContainer?: boolean;
   defaultText?: ReactNode;
   className?: string;
+  render?: ComponentType<Omit<PresetLoaderProps, 'render'>>;
 } & P;
 
 export type PresetErrorProps = {
@@ -138,13 +139,20 @@ export type MonacoProviderProps = PresetProviderProps & {
 /******************************************************************************
  * Monaco Theme
  ******************************************************************************/
-export type MonacoTheme = {
+export type MonacoThemeColor = {
+  primary: string;
+  background: string;
+  text: string;
+};
+
+export type MonacoCustomTheme = {
   name: string;
+  color?: string | Partial<MonacoThemeColor>;
   isDark?: boolean;
   data: monaco.editor.IStandaloneThemeData;
 };
 
-export type MonacoThemeFn = () => MonacoTheme;
+export type MonacoCustomThemeFn = () => MonacoCustomTheme;
 
 /******************************************************************************
  * MonacoCodeEditor

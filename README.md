@@ -5,6 +5,48 @@ App 的代码。
 
 [react-monaco demo 演示](https://static.kephp.com/react-monaco/index.html)，第一次打开下载很慢（本身绕国外就慢），实际走 github 下载的，下载后保存到 indexeddb ，第二次打开就很快了。
 
+## 更新日志
+
+### 25/03/15
+
+一、resolve react tsx 的代码正确渲染的问题：
+
+1. model 要指定 uri: `xxx.tsx`
+2. 正确的 `monaco.languages.typescript` 配置，尤其是 `jsx: monaco.languages.typescript.JsxEmit.ReactJSX`
+```ts
+monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+  jsx: monaco.languages.typescript.JsxEmit.ReactJSX,
+  jsxFactory: 'React.createElement',
+  reactNamespace: 'React',
+  target: monaco.languages.typescript.ScriptTarget.ESNext,
+  allowNonTsExtensions: true,
+  moduleResolution:
+    monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+  module: monaco.languages.typescript.ModuleKind.ESNext,
+  esModuleInterop: true,
+  noEmit: true,
+});
+```
+3. 加载额外的 d.ts ，必须要附加 `react` 和 `react/jsx-runtime` ，通过 `languages.typescript.typescriptDefaults.addExtraLib`
+
+二、嵌入 `@biomejs/wasm-web` 试验，已经解决，可参考：[BiomePlugin.tsx](src/plugins/biome/BiomePlugin.tsx) 。
+
+后续会添加基于 biome 的针对 js/ts/html/json/css 的语法检查和格式化。
+
+该插件模式后续会继续扩展包括加入 `oxc` ，主要针对 JS/TS 的语法检查。
+
+biome wasm 嵌入方式采用代码魔改，因为这版本 npm 源码很多都是错误的地方，需要本地做大量修改。
+
+三、monaco-editor 主题色会和 mui 主题色联动。
+
+四、嵌入 d.ts 加载，测试部分库可正确提示（如 `usehooks-ts`，`@zenstone/ts-utils/remote`）。
+
+后续基于 `oxc` 进行语法分析，即可动态提取文件中的 import ，以动态加载 d.ts 文件（目前是写死的）。
+
+五、简化 `AssetsLoader` ，移除函数 `assets` 传入
+
+## 废话连篇
+
 23年某个项目里，大量使用了 `CodeMirror` ，但 `CodeMirror` 要扩展 auto complete
 功能的工作量实在太大， 接入 LSP 服务，或者嵌入其他的 lint（formatter
 反而好做），语法检查插件，都非常麻烦。按照官方的说法是可以支持 `.d.ts`
@@ -67,7 +109,7 @@ function App() {
 }
 ```
 
-[App.tsx](src/App.tsx) 可以视作一个最基础的扩展开发。
+[App.tsx](src/CodeEditor.tsx) 可以视作一个最基础的扩展开发。
 
 其中加入了：
 

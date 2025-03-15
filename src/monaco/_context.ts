@@ -1,11 +1,20 @@
 import { createContext, useContext } from 'react';
-import type { useMonacoProviderInit } from './hooks';
+import type { useMonacoCodeEditorInit, useMonacoProviderInit } from './hooks';
 
-export type MonacoProviderHook = ReturnType<typeof useMonacoProviderInit>;
+export type MonacoContext = ReturnType<typeof useMonacoProviderInit>;
 
 // @ts-ignore context init
-const Context = createContext<MonacoProviderHook>({ inMonaco: false });
+const Context = createContext<MonacoContext>({ inMonaco: false });
 
 export const Provider = Context.Provider;
 
 export const useMonacoProvider = () => useContext(Context);
+
+export type MonacoCodeEditorContext = ReturnType<
+  typeof useMonacoCodeEditorInit
+>;
+
+// @ts-ignore context init
+const CodeEditorContext = createContext<MonacoCodeEditorContext>({});
+
+export const CodeEditorProvider = CodeEditorContext.Provider;

@@ -1,10 +1,15 @@
 // ref: https://www.npmjs.com/package/monaco-themes
 
-import type { MonacoTheme } from '../monaco';
+import type { MonacoCustomTheme } from '../monaco';
 
-export default (): MonacoTheme => ({
+export default (): MonacoCustomTheme => ({
   name: 'oceanic-next',
   isDark: true,
+  color: {
+    primary: '#c594c5',
+    background: 'rgb(27, 43, 52)',
+    text: 'rgb(205, 211, 222)',
+  },
   data: {
     base: 'vs-dark',
     inherit: true,

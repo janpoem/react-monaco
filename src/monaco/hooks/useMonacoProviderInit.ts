@@ -3,7 +3,8 @@ import {
   mountRemote,
   type MountRemoteOptions,
 } from '@zenstone/ts-utils/remote';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import { useIsomorphicLayoutEffect } from 'usehooks-ts';
 import {
   editorWorkerKey,
   localePrefix,
@@ -29,6 +30,8 @@ export const useMonacoProviderInit = ({
   handlePrepareMountAssets,
   onMounting,
 }: MonacoProviderProps) => {
+  const localeRef = useRef(iLocale);
+
   const baseUrl = useMemo(() => {
     try {
       return new URL(iBaseUrl || '', location.origin);
@@ -41,9 +44,13 @@ export const useMonacoProviderInit = ({
   const [readyState, setReadyState] = useState(MonacoReadyState.Init);
   const [assetsIds, setAssetsIds] = useState<string[]>([]);
 
+  const [preloadAssets, setPreloadAssets] = useState<
+    MonacoPreloadAsset[] | undefined
+  >(undefined);
+
   const prepareAssets = useCallback(
     async (locale?: string) => {
-      let preloadAssets: MonacoPreloadAsset[] = [];
+      let _assets: MonacoPreloadAsset[] = [];
 
       for (const it of assets) {
         if (it == null || !it.url) continue;
@@ -63,24 +70,24 @@ export const useMonacoProviderInit = ({
         }
 
         if (isRequired) {
-          preloadAssets.push({ key, url, priority, labels });
+          _assets.push({ key, url, priority, labels });
         }
       }
 
-      if (preloadAssets.length) {
-        preloadAssets = preloadAssets.sort(orderAssets);
+      if (_assets.length) {
+        _assets = _assets.sort(orderAssets);
       }
 
       if (handlePrepareAssets != null) {
         return handlePrepareAssets({
           locale,
           assets,
-          preloadAssets,
+          preloadAssets: _assets,
           isBlobWorker,
         });
       }
 
-      return preloadAssets;
+      return _assets;
     },
     [baseUrl, assets, isBlobWorker, handlePrepareAssets],
   );
@@ -129,6 +136,22 @@ export const useMonacoProviderInit = ({
     [iLocale, isBlobWorker, onPreload, handlePrepareMountAssets, onMounting],
   );
 
+  useIsomorphicLayoutEffect(() => {
+    if (localeRef.current !== iLocale) {
+      // 修改多语言环境，只允许在 Mounted 环境修改进行响应
+      if (readyState !== MonacoReadyState.Mounted) return;
+      localeRef.current = iLocale;
+    } else {
+      if (readyState !== MonacoReadyState.Init) return;
+    }
+    prepareAssets(iLocale)
+      .then((res) => {
+        setPreloadAssets(res);
+        setReadyState(MonacoReadyState.Init);
+      })
+      .catch(setError);
+  }, [iLocale, readyState, prepareAssets]);
+
   return {
     // props
     baseUrl,
@@ -144,6 +167,8 @@ export const useMonacoProviderInit = ({
     setReadyState,
     assetsIds,
     setAssetsIds,
+    preloadAssets,
+    setPreloadAssets,
     // complex vars
     inMonaco: true,
     shouldPreload: readyState === MonacoReadyState.Init,

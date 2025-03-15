@@ -7,13 +7,12 @@ import {
   type MonacoPreloadAsset,
   type MonacoPreloadProcess,
   MonacoPreloadState,
+  type PresetLoaderProps,
 } from '../types';
-
-type MaybeItOrCallback<T> = T | (() => T | Promise<T>);
 
 export type AssetsLoaderProps<P = unknown> = {
   shouldPreload?: boolean;
-  assets: MaybeItOrCallback<MonacoPreloadAsset[]>;
+  assets?: MonacoPreloadAsset[];
   isFetchDownload?: boolean;
   isCompressed?: boolean;
   withContainer?: boolean;
@@ -24,11 +23,12 @@ export type AssetsLoaderProps<P = unknown> = {
   ) => void | Promise<void>;
   defaultText?: ReactNode;
   children?: ReactNode;
+  render?: PresetLoaderProps<P>['render'];
 } & P;
 
 export const AssetsLoader = <P = unknown>({
   shouldPreload,
-  assets: inputAssets,
+  assets,
   isFetchDownload,
   isCompressed,
   withContainer,
@@ -36,8 +36,8 @@ export const AssetsLoader = <P = unknown>({
   onLoad,
   defaultText,
   children,
+  render,
 }: AssetsLoaderProps<P>) => {
-  const assetsRef = useRef<MonacoPreloadAsset[] | undefined>(undefined);
   const abortRef = useRef<AbortController | undefined>(undefined);
 
   const percentRef = useRef(0);
@@ -54,7 +54,6 @@ export const AssetsLoader = <P = unknown>({
 
   const newQueue = useCallback(
     (assets: MonacoPreloadAsset[]) => {
-      assetsRef.current = assets;
       abortRef.current = new AbortController();
       percentRef.current = 0;
       if (!assets.length) {
@@ -82,10 +81,32 @@ export const AssetsLoader = <P = unknown>({
   );
 
   useIsomorphicLayoutEffect(() => {
-    filterAssets(inputAssets).then((assets) => {
-      newQueue(assets);
-    });
-  }, [inputAssets, newQueue]);
+    if (assets == null) {
+      setProcess(undefined);
+    } else if (!assets.length) {
+      percentRef.current = 0;
+      setProcess(undefined);
+      onLoad?.(new DownloadQueue([]), assets);
+      return;
+    } else {
+      abortRef.current = new AbortController();
+      percentRef.current = 0;
+      const queue = new DownloadQueue(
+        assets.map((it) =>
+          new DownloadTask({
+            url: it.url,
+            cache: 'force-cache',
+            signal: abortRef.current?.signal,
+          }).setCompressed(isCompressed),
+        ),
+      );
+      setProcess({
+        state: MonacoPreloadState.Download,
+        assets,
+        queue,
+      });
+    }
+  }, [assets, newQueue]);
 
   useTheLoader({
     canLoad: shouldPreload && process != null,
@@ -110,7 +131,7 @@ export const AssetsLoader = <P = unknown>({
       setProcess((prev) =>
         prev == null ? prev : { ...prev, state: MonacoPreloadState.Prepare },
       );
-      onLoad?.(q, assetsRef.current ?? []);
+      onLoad?.(q, process?.assets ?? []);
     },
   });
 
@@ -124,14 +145,11 @@ export const AssetsLoader = <P = unknown>({
           isFetchDownload,
           withContainer,
           defaultText,
+          render,
         }}
       />
     );
   }
 
   return <>{children}</>;
-
-  async function filterAssets(assets: AssetsLoaderProps['assets']) {
-    return typeof assets === 'function' ? await assets() : assets;
-  }
 };

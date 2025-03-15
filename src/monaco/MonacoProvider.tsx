@@ -1,4 +1,4 @@
-import { type ReactNode, useCallback } from 'react';
+import { type ReactNode } from 'react';
 import { Provider } from './_context';
 import { AssetsLoader, ErrorDisplay } from './components';
 import { useMonacoProviderInit } from './hooks';
@@ -16,20 +16,14 @@ export const MonacoProvider = ({
 }: MonacoProviderProps & { children?: ReactNode }) => {
   const hook = useMonacoProviderInit(props);
   const {
-    locale,
     isCompressed,
     isFetchDownload,
     error,
     setError,
     shouldPreload,
-    prepareAssets,
+    preloadAssets,
     handlePreload,
   } = hook;
-
-  const assets = useCallback(
-    () => prepareAssets(locale),
-    [locale, prepareAssets],
-  );
 
   return (
     <PresetProvider components={components} texts={texts}>
@@ -37,7 +31,7 @@ export const MonacoProvider = ({
         <Container fluid>
           <ErrorDisplay scope={scope} error={error} withContainer>
             <AssetsLoader
-              assets={assets}
+              assets={preloadAssets}
               shouldPreload={shouldPreload}
               isCompressed={isCompressed}
               isFetchDownload={isFetchDownload}

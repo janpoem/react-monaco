@@ -1,10 +1,15 @@
 // ref: https://www.npmjs.com/package/monaco-themes
 
-import type { MonacoTheme } from '../monaco';
+import type { MonacoCustomTheme } from '../monaco';
 
-export default (): MonacoTheme => ({
+export default (): MonacoCustomTheme => ({
   name: 'tomorrow-night',
   isDark: true,
+  color: {
+    primary: '#b294bb',
+    background: 'rgb(29, 31, 33)',
+    text: 'rgb(197, 200, 198)',
+  },
   data: {
     base: 'vs-dark',
     inherit: true,

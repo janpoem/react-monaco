@@ -6,7 +6,9 @@
   "scripts": {
     "build": "rsbuild build",
     "dev": "rsbuild dev",
-    "preview": "rsbuild preview"
+    "preview": "rsbuild preview",
+    "lint": "biome lint --error-on-warnings ./src",
+    "ts-check": "bunx --bun tsc --noEmit"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -18,7 +20,8 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "use-the-loader": "^1.0.6",
-    "usehooks-ts": "^3.1.1"
+    "usehooks-ts": "^3.1.1",
+    "@oxc-parser/wasm": "^0.58.1"
   },
   "devDependencies": {
     "@rsbuild/core": "^1.2.14",
@@ -28,6 +31,7 @@
     "typescript": "^5.8.2",
     "@biomejs/biome": "latest",
     "monaco-editor": "^0.52.2",
-    "dexie": "^4.0.11"
+    "dexie": "^4.0.11",
+    "@oxc-project/types": "^0.58.1"
   }
 }

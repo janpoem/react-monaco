@@ -1,5 +1,6 @@
 :root {
-  font-size: 16px;
+  font-size: 14px;
+  line-height: 1.4;
   height: 100%;
   font-family: Roboto, "PingFang SC", "Noto Sans SC", "Microsoft YaHei UI",
     "Microsoft YaHei", "Segoe UI", sans-serif;

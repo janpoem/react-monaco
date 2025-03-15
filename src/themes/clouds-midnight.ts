@@ -1,9 +1,14 @@
 // ref: https://www.npmjs.com/package/monaco-themes
 
-import type { MonacoTheme } from '../monaco';
+import type { MonacoCustomTheme } from '../monaco';
 
-export default (): MonacoTheme => ({
+export default (): MonacoCustomTheme => ({
   name: 'clouds-midnight',
+  color: {
+    primary: '#927c5d',
+    background: 'rgb(25, 25, 25)',
+    text: 'rgb(146, 146, 146)',
+  },
   isDark: true,
   data: {
     base: 'vs-dark',

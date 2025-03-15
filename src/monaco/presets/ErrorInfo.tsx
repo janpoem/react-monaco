@@ -12,7 +12,7 @@ const PresetErrorInfo = ({
 }: PresetErrorProps) => {
   const children = (
     <Container gap={'0.5em'} className={css`max-width: 480px;`}>
-      <div>{scope && <strong>{scope}</strong>} error:</div>
+      {scope && <strong>{scope}</strong>}
       {errMsg(error) || defaultText}
     </Container>
   );

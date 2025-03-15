@@ -13,7 +13,7 @@ export const useMonacoCodeEditorInit = ({
   onChange,
 }: MonacoCodeEditorProps) => {
   const monacoHook = useMonacoProvider();
-  const { inMonaco, readyState, setError } = monacoHook;
+  const { inMonaco, readyState, setError, setReadyState } = monacoHook;
 
   const onCreateModelFn = useEventCallback(onCreateModel);
   const onCreateEditorFn = useEventCallback(onCreateEditor);
@@ -27,14 +27,12 @@ export const useMonacoCodeEditorInit = ({
   const inputRef = useRef(input);
 
   useIsomorphicLayoutEffect(() => {
-    if (!inMonaco) return;
-
-    if (readyState === MonacoReadyState.Mounting) {
-      try {
-        mountEditor();
-      } catch (err) {
-        setError(err);
-      }
+    if (!inMonaco || readyState !== MonacoReadyState.Mounting) return;
+    try {
+      mountEditor();
+      setReadyState(MonacoReadyState.Mounted);
+    } catch (err) {
+      setError(err);
     }
   }, [inMonaco, readyState]);
 

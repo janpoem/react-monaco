@@ -20,5 +20,5 @@
     "noUnusedParameters": true
   },
   "include": ["src"],
-  "exclude": ["node_modules", "__files"]
+  "exclude": ["node_modules", "__files", "src/plugins/biome/**/*"]
 }
