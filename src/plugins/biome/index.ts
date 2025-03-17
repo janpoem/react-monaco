@@ -2,6 +2,6 @@ import { lazy } from 'react';
 
 export * from './js-api';
 
-const BiomeTest = lazy(() => import('./BiomePlugin'));
+const BiomePlugin = lazy(() => import('./BiomePlugin'));
 
-export { BiomeTest };
+export { BiomePlugin };

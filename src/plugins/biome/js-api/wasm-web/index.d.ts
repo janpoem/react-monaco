@@ -49,15 +49,15 @@ interface BiomePath {
    */
   was_written: boolean;
 }
-type FeatureKind =
+export type FeatureKind =
   | 'Format'
   | 'Lint'
   | 'OrganizeImports'
   | 'Search'
   | 'Assists'
   | 'Debug';
-type FileKind = FileKind2[];
-type FileKind2 =
+export type FileKind = FileKind2[];
+export type FileKind2 =
   | 'Config'
   | 'Manifest'
   | 'Ignore'

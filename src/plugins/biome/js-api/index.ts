@@ -31,6 +31,8 @@ import type {
   BiomePath,
   Diagnostic,
   DiagnosticPrinter,
+  FileKind,
+  FileKind2,
   FixFileMode,
   InitInput,
   PartialConfiguration as Configuration,
@@ -126,6 +128,8 @@ export interface PrintDiagnosticsOptions {
 }
 
 export class Biome {
+  #curProjectKey: ProjectKey = '';
+
   private constructor(
     public readonly module: WasmModule,
     public readonly workspace: Workspace,
@@ -144,7 +148,7 @@ export class Biome {
     });
     const workspace = new module.Workspace();
     const biome = new Biome(module, workspace);
-    biome.openProject();
+    biome.#curProjectKey = biome.openProject();
     return biome;
   }
 
@@ -158,6 +162,10 @@ export class Biome {
     this.workspace.free();
   }
 
+  get projectKey() {
+    return this.#curProjectKey;
+  }
+
   /**
    * Allows to apply a custom configuration.
    *
@@ -167,12 +175,12 @@ export class Biome {
    * @param {Configuration} configuration
    */
   applyConfiguration(
-    projectKey: ProjectKey,
     configuration: Configuration,
+    projectKey?: ProjectKey,
   ): void {
     try {
       this.workspace.updateSettings({
-        projectKey,
+        projectKey: projectKey ?? this.projectKey,
         configuration,
         gitignore_matches: [],
         // ? or workspace_directory? @janpoem
@@ -201,6 +209,25 @@ export class Biome {
     // });
   }
 
+  newBiomePath = (
+    path: string | BiomePath,
+    kindOrKinds: FileKind2 | FileKind = ['Handleable'],
+    was_written = false,
+  ): BiomePath => {
+    if (this.isBiomePath(path)) return path;
+    const kind = Array.isArray(kindOrKinds) ? kindOrKinds : [kindOrKinds];
+    return { path, kind, was_written };
+  };
+
+  isBiomePath = (input: string | BiomePath): input is BiomePath => {
+    return (
+      typeof input === 'object' &&
+      !Array.isArray(input) &&
+      typeof input.path === 'string' &&
+      Array.isArray(input.kind)
+    );
+  };
+
   private tryCatchWrapper<T>(func: () => T): T {
     try {
       return func();
@@ -210,41 +237,34 @@ export class Biome {
   }
 
   private withFile<T>(
-    projectKey: ProjectKey,
-    path: string,
+    inputPath: string | BiomePath,
     content: string,
     func: (path: BiomePath) => T,
   ): T {
     return this.tryCatchWrapper(() => {
-      const p: BiomePath = {
-        kind: ['Handleable'],
-        was_written: true,
-        path: path,
-      };
+      const path = this.newBiomePath(inputPath);
       this.workspace.openFile({
         content,
         // content: { type: 'fromClient', content, version: 0 },
-        path: p,
+        path,
         version: 0,
       });
 
       try {
-        return func(p);
+        return func(path);
       } finally {
-        this.workspace.closeFile({
-          path: p,
-        });
+        this.workspace.closeFile({ path });
       }
     });
   }
 
   formatContent(
-    projectKey: ProjectKey,
+    // projectKey: ProjectKey,
     content: string,
     options: FormatContentOptions,
   ): FormatResult;
   formatContent(
-    projectKey: ProjectKey,
+    // projectKey: ProjectKey,
     content: string,
     options: FormatContentDebugOptions,
   ): FormatDebugResult;
@@ -257,11 +277,11 @@ export class Biome {
    * @param {FormatContentOptions | FormatContentDebugOptions} options Options needed when formatting some content
    */
   formatContent(
-    projectKey: ProjectKey,
+    // projectKey: ProjectKey,
     content: string,
     options: FormatContentOptions | FormatContentDebugOptions,
   ): FormatResult | FormatDebugResult {
-    return this.withFile(projectKey, options.filePath, content, (path) => {
+    return this.withFile(options.filePath, content, (path) => {
       let code = content;
 
       const { diagnostics } = this.workspace.pullDiagnostics({
@@ -318,22 +338,22 @@ export class Biome {
    * @param {LintContentOptions} options Options needed when linting some content
    */
   lintContent(
-    projectKey: ProjectKey,
+    // projectKey: ProjectKey,
     content: string,
     { filePath, fixFileMode }: LintContentOptions,
   ): LintResult {
     const maybeFixedContent = fixFileMode
-      ? this.withFile(projectKey, filePath, content, (path) => {
+      ? this.withFile(filePath, content, (path) => {
           let code = content;
 
           const result = this.workspace.fixFile({
             // projectKey,
             path,
-            fixFileMode: fixFileMode,
-            shouldFormat: false,
+            fix_file_mode: fixFileMode,
+            should_format: false,
             only: [],
             skip: [],
-            ruleCategories: ['syntax', 'lint'],
+            rule_categories: ['Syntax', 'Lint'],
           });
 
           code = result.code;
@@ -342,7 +362,7 @@ export class Biome {
         })
       : content;
 
-    return this.withFile(projectKey, filePath, maybeFixedContent, (path) => {
+    return this.withFile(filePath, maybeFixedContent, (path) => {
       const { diagnostics } = this.workspace.pullDiagnostics({
         // projectKey,
         path,
