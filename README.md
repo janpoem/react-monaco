@@ -3,47 +3,86 @@
 `monaco-editor` 的 react 实现。核心源代码目录在 `src/monaco` ，其他代码皆为用于演示
 App 的代码。
 
-[react-monaco 演示](https://static.kephp.com/react-monaco/0.0.1/index.html)，第一次打开下载很慢（本身绕国外就慢），实际走 github 下载的，下载后保存到 indexeddb ，第二次打开就很快了。
+[react-monaco 演示](https://static.kephp.com/react-monaco/0.0.2/index.html)，第一次打开下载很慢（本身绕国外就慢），实际走 github 下载的，下载后保存到 indexeddb ，第二次打开就很快了。
 
 ## 更新日志
 
+### 25/03/19
+
+- `preset-provider` 提高层级，作为公共部分，由调用者传入 `C` `T` 决定具体实现。
+  - check like [MonacoProvider.tsx](src/monaco/MonacoProvider.tsx)
+- 基于 [emittery](https://www.npmjs.com/package/emittery) 改用事件机制
+  - `prepareAssets` `interceptPrepareAssets` 资产准备阶段（拦截）
+  - `preload` `asset` `asset:${key}` `interceptMountAssets` 资产预载完毕，资产处理接管，资产挂载前拦截
+  - `mounting` MonacoProvider 挂载，专指资产挂载完毕
+  - `mounted` MonacoCodeEditor 挂载完毕 
+  - `prepareModel` `createModel` `changeModel` model 相关（前、创建后、onChange）
+- 预设文本完善
+- 基于 `onigasm` `monaco-textmate` `monaco-editor-textmate` 实现接入 textmate 的文法解析。
+  - 实现于 [TextmateInjection.tsx](src/plugins/textmate/TextmateInjection.tsx)，外挂式注入（结合事件）
+  - 主题全部转 tm 主题（没人会喜欢 monaco 原本自带的主题，太单调）
+- 目录结构调整，删除多余文件
+
+    src 目录结构调整说明
+    
+    ```
+    src
+     ├── db               前端 indexedDB
+     ├── monaco           * monaco-editor 相关封装
+     ├── plugins          * 插件库
+     ├── preset-provider  * 组件、文本供给器
+     ├── samples          示例入口
+     └── toolbar          工具栏相关
+    ```
+    
+    标 `*` 为该项目核心代码，其他为示例所需。
+
+- 组件调用层级关系简化，为后面的 IDE 示例预简化：
+
+  ```tsx
+  <MonacoProvider injections={<TextmateInjection/>}>
+    <MonacoCodeEditor
+      topBar={<div>TopBar</div>}
+      footBar={<div>FootBar</div>}
+    />
+  </MonacoProvider>;
+  ```
+  - 在 monaco 相关资产为完全加载完毕前，MonacoProvider 的 children 处于未可挂载的状态。
+  - 可通过 `injections` 来注入需要和资产挂载时同时注入的组件（事件）
+  - 但需要注意事件需要有完整的挂载和卸载，否则可能导致事件被多次触发。
+
 ### 25/03/15
 
-一、resolve react tsx 的代码正确渲染的问题：
+- resolve react tsx 的代码正确渲染的问题：
 
-1. model 要指定 uri: `xxx.tsx`
-2. 正确的 `monaco.languages.typescript` 配置，尤其是 `jsx: monaco.languages.typescript.JsxEmit.ReactJSX`
-```ts
-monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
-  jsx: monaco.languages.typescript.JsxEmit.ReactJSX,
-  jsxFactory: 'React.createElement',
-  reactNamespace: 'React',
-  target: monaco.languages.typescript.ScriptTarget.ESNext,
-  allowNonTsExtensions: true,
-  moduleResolution:
-    monaco.languages.typescript.ModuleResolutionKind.NodeJs,
-  module: monaco.languages.typescript.ModuleKind.ESNext,
-  esModuleInterop: true,
-  noEmit: true,
-});
-```
-3. 加载额外的 d.ts ，必须要附加 `react` 和 `react/jsx-runtime` ，通过 `languages.typescript.typescriptDefaults.addExtraLib`
+  1. model 要指定 uri: `xxx.tsx`
+  2. 正确的 `monaco.languages.typescript` 配置，尤其是 `jsx: monaco.languages.typescript.JsxEmit.ReactJSX`
+    ```ts
+    monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+      jsx: monaco.languages.typescript.JsxEmit.ReactJSX,
+      jsxFactory: 'React.createElement',
+      reactNamespace: 'React',
+      target: monaco.languages.typescript.ScriptTarget.ESNext,
+      allowNonTsExtensions: true,
+      moduleResolution:
+        monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+      module: monaco.languages.typescript.ModuleKind.ESNext,
+      esModuleInterop: true,
+      noEmit: true,
+    });
+    ```
+  3. 加载额外的 d.ts ，必须要附加 `react` 和 `react/jsx-runtime` ，通过 `languages.typescript.typescriptDefaults.addExtraLib`
 
-二、嵌入 `@biomejs/wasm-web` 试验，已经解决，可参考：[BiomePlugin.tsx](src/plugins/biome/BiomePlugin.tsx) 。
+- 嵌入 `@biomejs/wasm-web` 试验，已经解决，可参考：[BiomePlugin.tsx](src/plugins/biome/BiomePlugin.tsx) 。
 
-后续会添加基于 biome 的针对 js/ts/html/json/css 的语法检查和格式化。
+  1. 后续会添加基于 biome 的针对 js/ts/html/json/css 的语法检查和格式化。 
+  2. 该插件模式后续会继续扩展包括加入 `oxc` ，主要针对 JS/TS 的语法检查。 
+  3. biome wasm 嵌入方式采用代码魔改，因为这版本 npm 源码很多都是错误的地方，需要本地做大量修改。
+  4. monaco-editor 主题色会和 mui 主题色联动。
 
-该插件模式后续会继续扩展包括加入 `oxc` ，主要针对 JS/TS 的语法检查。
+- 嵌入 d.ts 加载，测试部分库可正确提示（如 `usehooks-ts`，`@zenstone/ts-utils/remote`）。后续基于 `oxc` 进行语法分析，即可动态提取文件中的 import ，以动态加载 d.ts 文件（目前是写死的）。
 
-biome wasm 嵌入方式采用代码魔改，因为这版本 npm 源码很多都是错误的地方，需要本地做大量修改。
-
-三、monaco-editor 主题色会和 mui 主题色联动。
-
-四、嵌入 d.ts 加载，测试部分库可正确提示（如 `usehooks-ts`，`@zenstone/ts-utils/remote`）。
-
-后续基于 `oxc` 进行语法分析，即可动态提取文件中的 import ，以动态加载 d.ts 文件（目前是写死的）。
-
-五、简化 `AssetsLoader` ，移除函数 `assets` 传入
+- 简化 `AssetsLoader` ，移除函数 `assets` 传入
 
 ## 废话连篇
 
@@ -120,7 +159,7 @@ function App() {
   （可参考 [preset.ts](src/preset-old.ts)）
 - monaco 主题（明/暗）和 mui 主题（明/暗）联动（初始状态，基于 media query）
 
-[react-monaco 演示](https://static.kephp.com/react-monaco/0.0.1/index.html)，第一次打开下载很慢（本身绕国外就慢），实际走 github 下载的，下载后保存到 indexeddb ，第二次打开就很快了。
+[react-monaco 演示](https://static.kephp.com/react-monaco/0.0.2/index.html)，第一次打开下载很慢（本身绕国外就慢），实际走 github 下载的，下载后保存到 indexeddb ，第二次打开就很快了。
 
 ## 特别说明
 
