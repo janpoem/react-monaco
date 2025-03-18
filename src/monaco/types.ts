@@ -1,26 +1,41 @@
 /// <reference types="monaco-editor/monaco.d.ts" />
 
-import type { DownloadQueue } from '@zenstone/ts-utils/fetch-download';
+import type {
+  DownloadQueue,
+  DownloadTask,
+} from '@zenstone/ts-utils/fetch-download';
 import type { MountRemoteOptions } from '@zenstone/ts-utils/remote';
+import type Emittery from 'emittery';
 import type { ComponentType, ReactNode } from 'react';
+import type { PresetText } from '../preset-provider';
+import type { MonacoRegistry } from './MonacoRegistry';
 
-type MaybyPromise<T> = T | Promise<T>;
+/******************************************************************************
+ * utils
+ ******************************************************************************/
+
+type MaybePromise<T> = T | Promise<T>;
 
 /******************************************************************************
  * MonacoAsset(s)
  ******************************************************************************/
 
-export type MonacoWorkerKey =
+export type MonacoAssetWorkerKey =
   `worker/${'editor' | 'ts' | 'html' | 'json' | 'css' | string}`;
 
-export type MonacoLocaleKey = `locale/${string}`;
+export type MonacoAssetLocaleKey = `locale/${string}`;
+
+export type MonacoAssetJsonKey = `json/${string}`;
+export type MonacoAssetWasmKey = `wasm/${string}`;
 
 export type MonacoAssetKey =
   | 'main'
+  | MonacoAssetWorkerKey
+  | MonacoAssetLocaleKey
   | `css`
   | `css/${string}`
-  | MonacoWorkerKey
-  | MonacoLocaleKey
+  | MonacoAssetJsonKey
+  | MonacoAssetWasmKey
   | string;
 
 export type MonacoAsset = {
@@ -54,31 +69,48 @@ export type MonacoPreloadProcess = {
 /******************************************************************************
  * Preset Components
  ******************************************************************************/
-export type PresetProviderProps = {
-  components?: Partial<PresetComponents>;
-  texts?: Partial<PresetTexts>;
+export type MonacoPresetProps<
+  C extends MonacoPresetComponents = MonacoPresetComponents,
+  T extends MonacoPresetTexts = MonacoPresetTexts,
+> = {
+  components?: Partial<C>;
+  texts?: Partial<T>;
 };
 
-export type PresetComponents<
-  T extends Record<string, ComponentType> = Record<string, ComponentType>,
-> = {
-  Loader: ComponentType<PresetLoaderProps>;
-  ErrorInfo: ComponentType<PresetErrorProps>;
-} & T;
+export type MonacoPresetComponents = {
+  Loader: ComponentType<MonacoPresetLoaderProps>;
+  ErrorInfo: ComponentType<MonacoPresetErrorInfoProps>;
+};
 
-export type PresetTexts = Record<string, string>;
+export enum MonacoPresetError {
+  WORKERS_EMPTY = 'WORKERS_EMPTY',
+  NO_CONTAINER = 'NO_CONTAINER',
+  INVALID_PRELOAD_PROCESS = 'INVALID_PRELOAD_PROCESS',
+  INVALID_CODE_INPUT = 'INVALID_CODE_INPUT',
+  MONACO_UNDEFINED = 'MONACO_UNDEFINED',
+  UNKNOWN = 'UNKNOWN',
+}
 
-export type PresetLoaderProps<P = unknown> = {
+export type MonacoTextKeys = string | MonacoPresetError;
+
+export type MonacoPresetTexts = {
+  Initializing: PresetText;
+  Downloading: PresetText;
+  Preparing: PresetText;
+  [key: MonacoTextKeys]: PresetText;
+};
+
+export type MonacoPresetLoaderProps<P = unknown> = {
   process?: MonacoPreloadProcess;
   percent: number;
   isFetchDownload?: boolean;
   withContainer?: boolean;
   defaultText?: ReactNode;
   className?: string;
-  render?: ComponentType<Omit<PresetLoaderProps, 'render'>>;
+  render?: ComponentType<Omit<MonacoPresetLoaderProps, 'render'>>;
 } & P;
 
-export type PresetErrorProps = {
+export type MonacoPresetErrorInfoProps = {
   scope?: string;
   error: unknown;
   withContainer?: boolean;
@@ -89,13 +121,22 @@ export type PresetErrorProps = {
 /******************************************************************************
  * MonacoProvider
  ******************************************************************************/
+export type DefaultRegistryData = {
+  [key: PropertyKey]: unknown;
+};
+
 export enum MonacoReadyState {
   Init = 0,
   Mounting = 1,
   Mounted = 2,
 }
 
-export type MonacoProviderProps = PresetProviderProps & {
+export type MonacoProviderProps<
+  C extends MonacoPresetComponents = MonacoPresetComponents,
+  T extends MonacoPresetTexts = MonacoPresetTexts,
+> = MonacoPresetProps<C, T> & {
+  registry?: MonacoRegistry | DefaultRegistryData;
+  events?: Emittery<MonacoEventsParams> | MonacoInputEvents;
   baseUrl?: string | URL;
   locale?: string;
   assets: MonacoAsset[];
@@ -108,51 +149,201 @@ export type MonacoProviderProps = PresetProviderProps & {
    * 所以额外提供一个配置参数，用于适配后端无法正确输出 content-type 的情况
    */
   isBlobWorker?: boolean;
-  /**
-   * 接管预备 monaco-editor 资产函数
-   *
-   * 定义了该函数，仍然会根据 baseUrl/assets/locale 来生成该次所需的资产（包含在 `params` 中）
-   *
-   * 如需要自行接管资产，可对该函数的返回结果进行处理
-   *
-   * @param params
-   */
-  handlePrepareAssets?: (params: {
-    locale?: string | undefined;
-    assets: MonacoAsset[];
-    preloadAssets: MonacoPreloadAsset[];
-    isBlobWorker?: boolean;
-  }) => MaybyPromise<MonacoPreloadAsset[]>;
-  onPreload?: (params: {
-    queue: DownloadQueue;
-    preloadAssets: MonacoPreloadAsset[];
-  }) => MaybyPromise<void>;
-  handlePrepareMountAssets?: (params: {
-    queue: DownloadQueue;
-    preloadAssets: MonacoPreloadAsset[];
-    remotes: MountRemoteOptions<unknown>[];
-    workers: MonacoPreloadAsset[];
-  }) => MaybyPromise<[MountRemoteOptions<unknown>[], MonacoPreloadAsset[]]>;
-  onMounting?: ($monaco: typeof monaco) => MaybyPromise<void>;
+  // handlePrepareAssets?: (params: {
+  //   locale?: string | undefined;
+  //   assets: MonacoAsset[];
+  //   preloadAssets: MonacoPreloadAsset[];
+  //   isBlobWorker?: boolean;
+  // }) => MaybePromise<MonacoPreloadAsset[]>;
+  // onPreload?: (params: {
+  //   queue: DownloadQueue;
+  //   preloadAssets: MonacoPreloadAsset[];
+  // }) => MaybePromise<void>;
+  // handlePrepareMountAssets?: (params: {
+  //   queue: DownloadQueue;
+  //   preloadAssets: MonacoPreloadAsset[];
+  //   remotes: MountRemoteOptions<unknown>[];
+  //   workers: MonacoPreloadAsset[];
+  // }) => MaybePromise<[MountRemoteOptions<unknown>[], MonacoPreloadAsset[]]>;
+  onMounting?: (params: MonacoMountingParams) => MaybePromise<void>;
 };
+
+/******************************************************************************
+ * MonacoEvents
+ ******************************************************************************/
+export type MonacoPrepareAssetsParams = {
+  baseUrl: URL;
+  locale?: string | undefined;
+  assets: MonacoAsset[];
+  preloadAssets: MonacoPreloadAsset[];
+  isBlobWorker?: boolean;
+};
+
+export type MonacoPrepareMountAssetsParams = {
+  baseUrl: URL;
+  locale?: string | undefined;
+  isBlobWorker?: boolean;
+  queue: DownloadQueue;
+  preloadAssets: MonacoPreloadAsset[];
+};
+
+export type MonacoPrepareMountAssets = {
+  remotes: MountRemoteOptions<unknown>[];
+  workers: MonacoPreloadAsset[];
+  data: DefaultRegistryData;
+};
+
+export type MonacoHandleAssetParams = {
+  key: string;
+  index: number;
+  task: DownloadTask;
+  asset: MonacoPreloadAsset;
+  mount: MonacoPrepareMountAssets;
+  handle: () => void;
+};
+
+export type MonacoModelPrepareParams = {
+  input: MonacoCodeInput;
+  language?: monaco.languages.ILanguageExtensionPoint;
+  extname?: string;
+  uri?: monaco.Uri;
+  monaco: typeof monaco;
+  editor?: monaco.editor.IStandaloneCodeEditor;
+};
+
+export type MonacoModelCreateParams = MonacoModelPrepareParams & {
+  model: monaco.editor.ITextModel;
+};
+
+export type MonacoModelChangeParams = MonacoModelCreateParams & {
+  event: monaco.editor.IModelContentChangedEvent;
+};
+
+export type MonacoMountingParams = {
+  monaco: typeof monaco;
+};
+
+export type MonacoCodeEditorMountedParams = {
+  monaco: typeof monaco;
+  editor: monaco.editor.IStandaloneCodeEditor;
+  model?: monaco.editor.ITextModel;
+};
+
+type HandleAssetKey = `asset:${string}`;
+
+export type MonacoEventsParams = {
+  /**
+   * 预备预加载资产事件
+   *
+   * 如果希望对预加载资产进行添加和修改，可使用该事件
+   */
+  prepareAssets: MonacoPrepareAssetsParams;
+  /**
+   * 拦截预加载资产事件
+   *
+   * 如果希望对最终的预加载资产进行总体控制，可使用该事件
+   */
+  interceptPrepareAssets: MonacoPrepareAssetsParams;
+  /**
+   * 预加载完成事件
+   *
+   * 根据 preloadAssets ，生成下载任务 queue
+   *
+   * 此时 queue 应该是已下载完成的状态
+   */
+  preload: MonacoPrepareMountAssetsParams;
+  /**
+   * 自定义资源接管事件
+   *
+   * 如果接管该资源，请使用 `handle()` 函数，表示已接管
+   *
+   * 暂时只允许非 main* css* local* worker* 的资源接管
+   *
+   * ```ts
+   * emittery.on('asset', ({ handle }) => {
+   *   // 接管处理...
+   *   handle(); // 表示正式接管该资源的处理
+   * })
+   * ```
+   */
+  asset: MonacoHandleAssetParams;
+  /**
+   * 自定义资源 key 接管事件
+   *
+   * 如果接管该资源，请使用 `handle()` 函数，表示已接管
+   *
+   * 暂时只允许非 main* css* local* worker* 的资源接管
+   *
+   * ```ts
+   * emittery.on('asset:json/test', ({ handle }) => {
+   *   // 接管处理...
+   *   handle(); // 表示正式接管该资源的处理
+   * })
+   * ```
+   */
+  [key: HandleAssetKey]: MonacoHandleAssetParams;
+  /**
+   * 拦截即将要加载的资源事件
+   */
+  interceptMountAssets: MonacoPrepareMountAssetsParams & {
+    mount: MonacoPrepareMountAssets;
+  };
+  /**
+   * monaco 加载中事件
+   *
+   * 该事件表示 monaco 所需资产已全部加载完毕，但 monaco-editor 尚未挂载的状态
+   */
+  mounting: MonacoMountingParams;
+  mounted: MonacoCodeEditorMountedParams;
+  prepareModel: MonacoModelPrepareParams;
+  createModel: MonacoModelCreateParams;
+  changeModel: MonacoModelChangeParams;
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  [key: PropertyKey]: any;
+};
+
+type EventCallbacks<T> = (
+  params: T,
+) => MaybePromise<void> | ((params: T) => MaybePromise<void>[]);
+
+export type MonacoInputEvents = Partial<{
+  [Key in keyof MonacoEventsParams]: EventCallbacks<MonacoEventsParams[Key]>;
+}>;
 
 /******************************************************************************
  * Monaco Theme
  ******************************************************************************/
-export type MonacoThemeColor = {
-  primary: string;
-  background: string;
-  text: string;
+// 默认提供 vs/vs-dark 的
+// 其他主题色，可以选择性实现
+export type MonacoThemeColors = {
+  primary: string; // activityBarBadge.background
+  secondary: string; // editor.selectionHighlightBackground
+  success: string; // ports.iconRunningProcessForeground
+  error: string; // statusBarItem.errorBackground
+  background: string; // editor.background
+  text: string; // editor.foreground
+  borderColor: string; // checkbox.border
 };
 
-export type MonacoCustomTheme = {
+export type MonacoCompleteTheme = {
+  // theme 主题名称，请勿使用敏感字符，这个是用来 `monaco.editor.defineTheme(name, data)`
   name: string;
-  color?: string | Partial<MonacoThemeColor>;
-  isDark?: boolean;
+  displayName: string;
+  colors: MonacoThemeColors;
+  isDark: boolean;
   data: monaco.editor.IStandaloneThemeData;
 };
 
-export type MonacoCustomThemeFn = () => MonacoCustomTheme;
+export type MonacoCustomTheme = {
+  // theme 主题名称，请勿使用敏感字符，这个是用来 `monaco.editor.defineTheme(name, data)`
+  name: string;
+  displayName: string;
+  colors: Partial<MonacoThemeColors>;
+  isDark: boolean;
+  data: monaco.editor.IStandaloneThemeData;
+};
+
+export type MonacoCustomThemeCallback = () => MonacoCustomTheme;
 
 /******************************************************************************
  * MonacoCodeEditor
@@ -170,7 +361,7 @@ export type MonacoCodeEditorProps = {
   options?: Partial<
     Omit<monaco.editor.IStandaloneEditorConstructionOptions, 'value' | 'model'>
   >;
-  onCreateModel?: (model: monaco.editor.ITextModel) => void;
-  onCreateEditor?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
-  onChange?: (ev: monaco.editor.IModelContentChangedEvent) => void;
+  onModel?: (params: MonacoModelCreateParams) => void;
+  onChange?: (params: MonacoModelChangeParams) => void;
+  onMounted?: (params: MonacoCodeEditorMountedParams) => void;
 };

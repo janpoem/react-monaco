@@ -10,3 +10,20 @@ export const db = new Dexie('MonacoDevel') as Dexie & {
 db.version(1).stores({
   sources: '++id, [key+version]',
 });
+
+db.version(2)
+  .stores({
+    sources: '++id, key',
+  })
+  .upgrade((trans) => {
+    console.log('upgrade');
+    trans
+      .table('sources')
+      .toArray()
+      .then((res) => {
+        // biome-ignore lint/complexity/noForEach: <explanation>
+        res.forEach((row) => {
+          trans.table('sources').delete(row.id);
+        });
+      });
+  });

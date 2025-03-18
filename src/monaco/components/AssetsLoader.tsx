@@ -2,12 +2,14 @@ import { DownloadQueue, DownloadTask } from '@zenstone/ts-utils/fetch-download';
 import { type ReactNode, useCallback, useRef, useState } from 'react';
 import { useTheLoader } from 'use-the-loader';
 import { useIsomorphicLayoutEffect } from 'usehooks-ts';
+import { usePresetProvider } from '../../preset-provider';
 import { PresetComponent } from '../presets';
 import {
   type MonacoPreloadAsset,
   type MonacoPreloadProcess,
   MonacoPreloadState,
-  type PresetLoaderProps,
+  MonacoPresetError,
+  type MonacoPresetLoaderProps,
 } from '../types';
 
 export type AssetsLoaderProps<P = unknown> = {
@@ -23,7 +25,7 @@ export type AssetsLoaderProps<P = unknown> = {
   ) => void | Promise<void>;
   defaultText?: ReactNode;
   children?: ReactNode;
-  render?: PresetLoaderProps<P>['render'];
+  render?: MonacoPresetLoaderProps<P>['render'];
 } & P;
 
 export const AssetsLoader = <P = unknown>({
@@ -38,6 +40,7 @@ export const AssetsLoader = <P = unknown>({
   children,
   render,
 }: AssetsLoaderProps<P>) => {
+  const { getText } = usePresetProvider();
   const abortRef = useRef<AbortController | undefined>(undefined);
 
   const percentRef = useRef(0);
@@ -112,7 +115,7 @@ export const AssetsLoader = <P = unknown>({
     canLoad: shouldPreload && process != null,
     loader: () => {
       if (process == null) {
-        throw new Error('Invalid preload state');
+        throw getText(MonacoPresetError.INVALID_PRELOAD_PROCESS);
       }
       return process.queue.read({
         onQueueError: handleError,

@@ -1,21 +1,31 @@
-import { type ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import { PresetProvider } from '../preset-provider';
 import { Provider } from './_context';
 import { AssetsLoader, ErrorDisplay } from './components';
 import { useMonacoProviderInit } from './hooks';
-import { PresetProvider } from './presets';
 import { Container } from './styled';
-import type { MonacoProviderProps } from './types';
+import type {
+  MonacoPresetComponents,
+  MonacoPresetTexts,
+  MonacoProviderProps,
+} from './types';
 
 const scope = 'MonacoProvider';
 
-export const MonacoProvider = ({
+export const MonacoProvider = <
+  C extends MonacoPresetComponents = MonacoPresetComponents,
+  T extends MonacoPresetTexts = MonacoPresetTexts,
+>({
   children,
-  components,
-  texts,
+  injections,
   ...props
-}: MonacoProviderProps & { children?: ReactNode }) => {
-  const hook = useMonacoProviderInit(props);
+}: MonacoProviderProps<C, T> & {
+  children?: ReactNode;
+  injections?: ReactNode;
+}) => {
+  const hook = useMonacoProviderInit<C, T>(props);
   const {
+    preset,
     isCompressed,
     isFetchDownload,
     error,
@@ -26,9 +36,10 @@ export const MonacoProvider = ({
   } = hook;
 
   return (
-    <PresetProvider components={components} texts={texts}>
+    <PresetProvider preset={preset}>
       <Provider value={hook}>
         <Container fluid>
+          {injections}
           <ErrorDisplay scope={scope} error={error} withContainer>
             <AssetsLoader
               assets={preloadAssets}

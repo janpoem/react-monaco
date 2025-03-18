@@ -1,15 +1,39 @@
 :root {
-  font-size: 14px;
-  line-height: 1.4;
-  height: 100%;
-  font-family: Roboto, "PingFang SC", "Noto Sans SC", "Microsoft YaHei UI",
+  --rm-font: Inter, "Noto Sans SC", "PingFang SC", "Microsoft YaHei UI",
     "Microsoft YaHei", "Segoe UI", sans-serif;
+  --rm-mono-font: "JetBrains Mono", "Roboto Mono", monospace;
+
+  font-size: 14px;
+  line-height: 1.5;
+  height: 100%;
+  font-family: var(--rm-font);
+
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "liga", "clig", "zero";
+  font-optical-sizing: auto;
+  font-stretch: normal;
+  font-variant-east-asian: simplified;
+  font-variant-ligatures: common-ligatures;
+  font-variant-numeric: slashed-zero;
+  font-weight: 400;
+  hyphenate-character: auto;
 }
 
 body {
   display: flex;
   flex-direction: column;
   min-height: 100%;
+  /*-webkit-text-stroke: 0.005em currentColor;*/
+}
+
+a {
+  text-decoration: none;
+}
+
+code,
+pre {
+  font-family: var(--rm-mono-font);
 }
 
 *,
@@ -58,6 +82,5 @@ body {
 }
 
 .monaco-editor {
-  font-family: Roboto, "PingFang SC", "Noto Sans SC", "Microsoft YaHei UI",
-    "Microsoft YaHei", "Segoe UI", sans-serif;
+  font-family: var(--rm-font);
 }

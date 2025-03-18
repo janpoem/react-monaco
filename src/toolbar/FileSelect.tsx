@@ -7,6 +7,8 @@ import scss from './__files/badge.css';
 import scala1 from './__files/Decidable.scala';
 import go1 from './__files/indent_handler.go';
 import ts1 from './__files/playgroud.ts';
+import prisma from './__files/schema.prisma';
+import dbml from './__files/Test.dbml';
 import rs1 from './__files/trait.rs';
 
 export const FileSelectOptions: MonacoFileCodeInput[] = [
@@ -17,6 +19,8 @@ export const FileSelectOptions: MonacoFileCodeInput[] = [
   py1,
   go1,
   scala1,
+  dbml,
+  prisma,
 ];
 
 export type FileSelectProps = {

@@ -8,13 +8,13 @@ import {
   type MonacoPreloadAsset,
   MonacoPreloadState,
 } from '../../monaco';
-import { biomeWasmUrl } from '../../preset';
+import { biomeWasmUrl } from '../../preset-old';
 import { Biome } from './js-api';
 import type { BiomePluginProps } from './types';
 
 const biomeAssets: MonacoPreloadAsset[] = [
   {
-    key: 'biome/wasm',
+    localeKey: 'biome/wasm',
     url: new URL(biomeWasmUrl),
     priority: 0,
   },

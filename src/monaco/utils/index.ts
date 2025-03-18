@@ -1,2 +1,3 @@
+export * from './asset-key';
 export * from './filters';
-export * from './monaco';
+export * from './misc';

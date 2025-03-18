@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
 import { PresetComponent } from '../presets';
-import type { PresetErrorProps } from '../types';
+import type { MonacoPresetErrorInfoProps } from '../types';
 
-export type ErrorDisplayProps = PresetErrorProps & {
+export type ErrorDisplayProps = MonacoPresetErrorInfoProps & {
   children?: ReactNode;
 };
 

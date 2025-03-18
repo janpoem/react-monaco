@@ -4,7 +4,9 @@ import type { useMonacoCodeEditorInit, useMonacoProviderInit } from './hooks';
 export type MonacoContext = ReturnType<typeof useMonacoProviderInit>;
 
 // @ts-ignore context init
-const Context = createContext<MonacoContext>({ inMonaco: false });
+const Context = createContext<MonacoContext>({
+  inMonaco: false,
+});
 
 export const Provider = Context.Provider;
 

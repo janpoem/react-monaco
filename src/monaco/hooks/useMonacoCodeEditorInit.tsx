@@ -2,22 +2,36 @@ import { useRef } from 'react';
 import { compare } from 'use-the-loader';
 import { useEventCallback, useIsomorphicLayoutEffect } from 'usehooks-ts';
 import { useMonacoProvider } from '../_context';
-import { type MonacoCodeEditorProps, MonacoReadyState } from '../types';
-import { createModel, globalMonacoThrow } from '../utils';
+import {
+  type MonacoCodeEditorProps,
+  type MonacoCodeInput,
+  MonacoPresetError,
+  MonacoReadyState,
+} from '../types';
+import { extractExtname, isFileInput } from '../utils';
 
 export const useMonacoCodeEditorInit = ({
   input,
   options,
-  onCreateModel,
-  onCreateEditor,
+  onModel,
   onChange,
+  onMounted,
 }: MonacoCodeEditorProps) => {
   const monacoHook = useMonacoProvider();
-  const { inMonaco, readyState, setError, setReadyState } = monacoHook;
+  const {
+    preset: { getText },
+    emitteryRef,
+    inMonaco,
+    readyState,
+    setError,
+    setReadyState,
+    globalMonacoThrow,
+    findLanguage,
+  } = monacoHook;
 
-  const onCreateModelFn = useEventCallback(onCreateModel);
-  const onCreateEditorFn = useEventCallback(onCreateEditor);
+  const onModelFn = useEventCallback(onModel);
   const onChangeFn = useEventCallback(onChange);
+  const onMountedFn = useEventCallback(onMounted);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | undefined>(
@@ -51,8 +65,6 @@ export const useMonacoCodeEditorInit = ({
       }
 
       modelRef.current = createModel(input);
-      modelRef.current.onDidChangeContent((ev) => onChangeFn?.(ev));
-      onCreateModelFn?.(modelRef.current);
       editorRef.current.setModel(modelRef.current);
     }
   }, [input]);
@@ -64,18 +76,57 @@ export const useMonacoCodeEditorInit = ({
     editorRef,
     modelRef,
     inputRef,
+    createModel,
   };
+
+  function createModel(input: MonacoCodeInput) {
+    const $monaco = globalMonacoThrow();
+    if (!isFileInput(input)) {
+      throw getText(MonacoPresetError.INVALID_CODE_INPUT);
+    }
+
+    const { filename, source, uri: iUri } = input;
+    const extname = extractExtname(filename);
+    const language = findLanguage(extname);
+
+    let id = language?.id;
+
+    if (!id) {
+      id = extname?.replace('.', '');
+    }
+
+    const uri = iUri ? $monaco.Uri.parse(iUri) : undefined;
+
+    const params = {
+      input,
+      language,
+      extname,
+      uri,
+      monaco: $monaco,
+      editor: editorRef.current,
+    };
+    emitteryRef.current.emit('prepareModel', params);
+
+    const model = $monaco.editor.createModel(source || '', id, uri);
+
+    model.onDidChangeContent((event) => {
+      onChangeFn?.({ ...params, model, event });
+      emitteryRef.current.emit('changeModel', { ...params, model, event });
+    });
+    onModelFn?.({ ...params, model });
+    emitteryRef.current.emit('createModel', { ...params, model });
+
+    return model;
+  }
 
   function mountEditor() {
     const $monaco = globalMonacoThrow();
     if (containerRef.current == null) {
-      throw 'Missing editor mount container';
+      throw getText(MonacoPresetError.NO_CONTAINER);
     }
 
     if (modelRef.current == null) {
       modelRef.current = createModel(inputRef.current);
-      modelRef.current.onDidChangeContent((ev) => onChangeFn?.(ev));
-      onCreateModelFn?.(modelRef.current);
     }
 
     if (editorRef.current == null) {
@@ -90,7 +141,13 @@ export const useMonacoCodeEditorInit = ({
         fontLigatures: 'common-ligatures, slashed-zero',
         ...options,
       });
-      onCreateEditorFn?.(editorRef.current);
+      const params = {
+        monaco: $monaco,
+        editor: editorRef.current,
+        model: modelRef.current,
+      };
+      onMountedFn?.(params);
+      emitteryRef.current.emit('mounted', params);
     }
   }
 };

@@ -1,13 +1,15 @@
-import CodeEditor from './CodeEditor';
+import { HashRouter, Route, Routes } from 'react-router';
+import { CodeEditorSample, ThemeConverter } from './samples';
 
 const App = () => {
-  // useIsomorphicLayoutEffect(() => {
-  //   Biome.create({ input: 'http://www.aaaa.com/abc.wasm' });
-  // }, []);
-
-  // return <CodeEditor />;
-
-  return <CodeEditor />;
+  return (
+    <HashRouter>
+      <Routes>
+        <Route index element={<CodeEditorSample />} />
+        <Route path={'/theme-converter'} element={<ThemeConverter />} />
+      </Routes>
+    </HashRouter>
+  );
 };
 
 export default App;

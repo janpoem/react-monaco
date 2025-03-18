@@ -1,16 +1,27 @@
 import { createElement, useMemo } from 'react';
+import { usePresetTexts } from '../../preset-provider';
 import { Container } from '../styled';
-import { MonacoPreloadState, type PresetLoaderProps } from '../types';
+import {
+  MonacoPreloadState,
+  type MonacoPresetLoaderProps,
+  type MonacoPresetTexts,
+} from '../types';
 
 const PresetLoader = ({
   process,
   percent,
   isFetchDownload,
   withContainer,
-  defaultText = 'Initializing...',
+  defaultText: iDefaultText,
   className,
   render,
-}: PresetLoaderProps) => {
+}: MonacoPresetLoaderProps) => {
+  const text = usePresetTexts<MonacoPresetTexts>();
+  const defaultText = useMemo(
+    () => iDefaultText || text('Initializing'),
+    [text, iDefaultText],
+  );
+
   const children = useMemo(() => {
     return render != null ? (
       createElement(render, {
@@ -25,8 +36,8 @@ const PresetLoader = ({
         {process == null
           ? defaultText
           : process.state === MonacoPreloadState.Download
-            ? `Downloading${isFetchDownload ? ` ${percent}%` : ''}...`
-            : 'Preparing...'}
+            ? text('Downloading', { isFetchDownload, percent })
+            : text('Preparing')}
         <progress
           max={100}
           value={
@@ -38,7 +49,15 @@ const PresetLoader = ({
         />
       </>
     );
-  }, [process, percent, isFetchDownload, withContainer, defaultText, render]);
+  }, [
+    process,
+    percent,
+    isFetchDownload,
+    withContainer,
+    defaultText,
+    render,
+    text,
+  ]);
 
   if (!withContainer) {
     return <>{children}</>;

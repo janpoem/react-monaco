@@ -117,7 +117,7 @@ function App() {
 - 切换文件
 - 切换主题（自定义主题动态注入）
 - 为了加速加载，第一次下载完成后会保存到本地的 indexeddb
-  （可参考 [preset.ts](src/preset.ts)）
+  （可参考 [preset.ts](src/preset-old.ts)）
 - monaco 主题（明/暗）和 mui 主题（明/暗）联动（初始状态，基于 media query）
 
 [react-monaco 演示](https://static.kephp.com/react-monaco/0.0.1/index.html)，第一次打开下载很慢（本身绕国外就慢），实际走 github 下载的，下载后保存到 indexeddb ，第二次打开就很快了。
