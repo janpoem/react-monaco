@@ -560,91 +560,91 @@ export default {
         token: 'meta.type.infer entity.name.type',
       },
       {
-        foreground: '#bcbec3',
+        foreground: '#bcbec4',
         token: 'meta.tag.attributes',
       },
       {
-        foreground: '#bcbec3',
+        foreground: '#bcbec4',
         token: 'meta.at-rule.for keyword.control.operator',
       },
       {
-        foreground: '#bcbec3',
+        foreground: '#bcbec4',
         token: 'variable.interpolation',
       },
       {
-        foreground: '#bcbec3',
+        foreground: '#bcbec4',
         token: 'entity.name.type',
       },
       {
-        foreground: '#bcbec3',
+        foreground: '#bcbec4',
         token: 'entity.name.function.tagged-template',
       },
       {
-        foreground: '#bcbec3',
+        foreground: '#bcbec4',
         token: 'constant.language.import-export-all',
       },
       {
-        foreground: '#bcbec3',
+        foreground: '#bcbec4',
         token: 'string variable',
       },
       {
-        foreground: '#bcbec3',
+        foreground: '#bcbec4',
         token: 'source.yaml string.unquoted',
       },
       {
-        foreground: '#bcbec3',
+        foreground: '#bcbec4',
         token: 'source.yaml constant.language.boolean',
       },
       {
-        foreground: '#bcbec3',
+        foreground: '#bcbec4',
         token: 'punctuation.accessor',
       },
       {
-        foreground: '#bcbec3',
+        foreground: '#bcbec4',
         token: 'keyword.operator',
       },
       {
-        foreground: '#bcbec3',
+        foreground: '#bcbec4',
         token: 'keyword.other.unit.percentage',
       },
       {
-        foreground: '#bcbec3',
+        foreground: '#bcbec4',
         token: 'keyword.other.back-reference.regexp',
       },
       {
-        foreground: '#bcbec3',
+        foreground: '#bcbec4',
         token: 'punctuation.definition.entity',
       },
       {
-        foreground: '#bcbec3',
+        foreground: '#bcbec4',
         token: 'punctuation.separator.key-value',
       },
       {
-        foreground: '#bcbec3',
+        foreground: '#bcbec4',
         token: 'punctuation.separator.list.comma.css',
       },
       {
-        foreground: '#bcbec3',
+        foreground: '#bcbec4',
         token: 'punctuation.definition.group.regexp',
       },
       {
-        foreground: '#bcbec3',
+        foreground: '#bcbec4',
         token: 'punctuation.definition.group.assertion.regexp',
       },
       {
-        foreground: '#bcbec3',
+        foreground: '#bcbec4',
         token: 'punctuation.definition.character-class.regexp',
       },
       {
-        foreground: '#bcbec3',
+        foreground: '#bcbec4',
         token: 'punctuation.definition.attribute-selector',
       },
       {
-        foreground: '#bcbec3',
+        foreground: '#bcbec4',
         token: 'punctuation.terminator',
       },
       {
-        foreground: '#bcbec3',
+        foreground: '#bcbec4',
         token: 'storage.type.function.arrow',
       },
       {
@@ -888,7 +888,7 @@ export default {
         token: 'source.css support.function',
       },
       {
-        foreground: '#BCBEC3',
+        foreground: '#BCBEC4',
         token: 'punctuation.decorator',
       },
       {

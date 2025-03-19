@@ -148,6 +148,19 @@ const ThemeConverter = () => {
                 );
               }}
             />
+            <TextField
+              variant={'filled'}
+              size={'small'}
+              label={'Display Name'}
+              value={convertData?.displayName ?? ''}
+              onChange={(e) => {
+                setConverterData((prev) =>
+                  prev == null
+                    ? undefined
+                    : { ...prev, displayName: e.target.value },
+                );
+              }}
+            />
             <TextArea value={JSON.stringify(convertData, null, 2)} readOnly />
           </Wrapper>
         </Box>
@@ -171,6 +184,21 @@ const ThemeConverter = () => {
       text: data.colors['editor.foreground'],
       borderColor: data.colors['checkbox.border'],
     };
+
+    if (colors.error == null) {
+      // biome-ignore lint/complexity/noForEach: <explanation>
+      data.rules.forEach((rule) => {
+        if (rule.token === 'invalid') {
+          if (rule.foreground != null) {
+            colors.error = rule.foreground;
+          }
+        }
+      });
+    }
+
+    console.log(colors.error);
+
+    data.base = isDark ? 'vs-dark' : 'vs';
 
     return {
       name,

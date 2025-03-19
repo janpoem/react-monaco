@@ -76,6 +76,7 @@ const CodeEditorSample = () => {
               key={`tm_${localeKey}`}
               provider={customTextmateProvider}
               onChange={setActiveLanguage}
+              tmBaseUrl={'http://localhost:3000/'}
             />
             <DtsInjection key={`dls_${localeKey}`} />
           </>

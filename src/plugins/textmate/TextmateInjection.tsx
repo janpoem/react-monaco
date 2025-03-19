@@ -224,6 +224,7 @@ const TextmateInjection = ({
       //     // console.log('wireTmGrammars', grammars);
       //   },
       // );
+      console.log(languageId, extname, language, scopeName);
       if (!wireGrammarsRef.current[scopeName]) {
         // console.log('wireCodeState-wireTmGrammars', scopeName);
         wireGrammarsRef.current[scopeName] = true;
@@ -253,14 +254,20 @@ const TextmateInjection = ({
             format = providersRef.current[scopeName].format;
             url = new URL(providersRef.current[scopeName].url);
           }
-          url.searchParams.set('v', '3');
+          url.searchParams.set('v', '2');
 
           let text = await (await fetch(url, { cache: 'force-cache' })).text();
           if (format === 'json') {
+            // 源文件中的 "include":"source.xxxx.xxx" 引用文件，要去掉 .source
+            // yaml.1.2, yaml.embedded => yaml-1.2, yaml-embedded
             text = text.replace(
               /\"include\":\"(source\.)([^\"]+)(\#[^\"]+)?\"/gm,
               (_ma, _p1, p2, p3) => {
-                return `"include":"${p2}${p3 || ''}"`;
+                let name = p2;
+                if (name.startsWith('yaml.')) {
+                  name = name.replace(/yaml\./, 'yaml-');
+                }
+                return `"include":"${name}${p3 || ''}"`;
               },
             );
           }

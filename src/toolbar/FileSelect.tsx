@@ -1,15 +1,18 @@
 import { MenuItem, Select } from '@mui/material';
 import type { MonacoFileCodeInput } from '../monaco';
 import tsx1 from './__files/App.tsx';
-//
 import py1 from './__files/backend.py';
 import scss from './__files/badge.css';
+// import yml from './__files/basic.yaml';
 import scala1 from './__files/Decidable.scala';
+import java from './__files/FreqTableExampleOriginal.java';
+import kt from './__files/ImageClientFragment.kt';
 import go1 from './__files/indent_handler.go';
 import ts1 from './__files/playgroud.ts';
 import prisma from './__files/schema.prisma';
 import dbml from './__files/Test.dbml';
 import rs1 from './__files/trait.rs';
+import json from './__files/vs.json';
 
 export const FileSelectOptions: MonacoFileCodeInput[] = [
   tsx1,
@@ -18,9 +21,12 @@ export const FileSelectOptions: MonacoFileCodeInput[] = [
   rs1,
   py1,
   go1,
+  java,
+  kt,
   scala1,
   dbml,
   prisma,
+  json,
 ];
 
 export type FileSelectProps = {

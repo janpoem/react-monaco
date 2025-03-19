@@ -18,7 +18,7 @@ export const LanguageDisplay = ({ value, tmActive }: LanguageDisplayProps) => {
       <Box
         sx={{
           color: palette.primary[palette.mode],
-          fontFamily: 'var(--rm-font-mono)',
+          fontFamily: 'var(--rm-mono-font)',
           userSelect: 'none',
           textTransform: 'capitalize',
           letterSpacing: '-0.065em',

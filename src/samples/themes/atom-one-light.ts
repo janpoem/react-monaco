@@ -1539,6 +1539,18 @@ export default {
         foreground: '#383A42',
         token: 'meta.class.php',
       },
+      {
+        foreground: '#c18401',
+        token: 'storage.modifier.import.java',
+      },
+      {
+        foreground: '#c18401',
+        token: 'variable.language.wildcard.java',
+      },
+      {
+        foreground: '#c18401',
+        token: 'storage.modifier.package.java',
+      },
     ],
     encodedTokensColors: [],
   },

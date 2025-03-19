@@ -41,6 +41,7 @@ export type MonacoAssetKey =
 export type MonacoAsset = {
   key: MonacoAssetKey;
   url: string | URL;
+  type?: string;
   labels?: string[];
   baseUrl?: string;
   priority?: number;
@@ -64,6 +65,19 @@ export type MonacoPreloadProcess = {
   state: MonacoPreloadState.Download | MonacoPreloadState.Prepare;
   assets: MonacoPreloadAsset[];
   queue: DownloadQueue;
+};
+
+export type MonacoPreloadQuery = {
+  locale?: string;
+  isFetchDownload?: boolean;
+  isCompressed?: boolean;
+  isBlobWorker?: boolean;
+};
+
+export type MonacoPreloadProps = {
+  baseUrl?: string | URL;
+  query?: MonacoPreloadQuery;
+  assets: MonacoAsset[];
 };
 
 /******************************************************************************
@@ -306,8 +320,10 @@ type EventCallbacks<T> = (
   params: T,
 ) => MaybePromise<void> | ((params: T) => MaybePromise<void>[]);
 
-export type MonacoInputEvents = Partial<{
-  [Key in keyof MonacoEventsParams]: EventCallbacks<MonacoEventsParams[Key]>;
+export type MonacoInputEvents<
+  Events extends MonacoEventsParams = MonacoEventsParams,
+> = Partial<{
+  [Key in keyof Events]: EventCallbacks<Events[Key]>;
 }>;
 
 /******************************************************************************
