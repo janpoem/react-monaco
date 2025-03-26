@@ -1,6 +1,5 @@
 import { isStr } from '@zenstone/ts-utils/string';
 import type { RemoteAsset } from '@zenstone/use-remote-loader';
-import type { MonacoWorkerAsset } from '../types';
 
 const prefixCheck =
   (prefix: string, allowEquals?: boolean) =>
@@ -23,8 +22,6 @@ export const isJsonKey = prefixCheck('json');
 export const isCssKey = prefixCheck('css', true);
 
 export const isMainKey = prefixCheck('main', true);
-
-export const convertKeyToId = (key: string) => key.replace(/\/+/gm, '_');
 
 export const isWorkerAsset = (
   asset: RemoteAsset,

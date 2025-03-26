@@ -1,10 +1,6 @@
 import { Fragment, useMemo } from 'react';
 import { MonacoLoaderProcess } from '../constants';
-import {
-  useMonacoCreateElement,
-  useMonacoLoaderText,
-  useMonacoPreset,
-} from '../hooks';
+import { useMonacoCreateElement, useMonacoLoaderText } from '../hooks';
 import {
   cssLoaderBox,
   cssVerticalContainer,
@@ -26,8 +22,6 @@ const Loader = ({
   style,
   className,
 }: MonacoPresetLoaderProps) => {
-  const getText = useMonacoPreset().getText;
-
   const [Ele, props] = useMemo(() => {
     return [
       withContainer ? 'div' : Fragment,
