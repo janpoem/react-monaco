@@ -1,15 +1,16 @@
 {
   "name": "@react-monaco/assets",
   "version": "1.0.0",
-  "description": "React monaco related assets.",
+  "description": "React monaco editor related assets.",
   "author": "Jiankai Zeng <janpoem@163.com>",
   "license": "MIT",
   "keywords": [
-    "preset context",
-    "preset provider",
-    "preset components",
-    "preset texts",
-    "react"
+    "react monaco editor",
+    "monaco editor",
+    "monaco assets",
+    "react monaco",
+    "monaco",
+    "assets"
   ],
   "repository": {
     "type": "git",
