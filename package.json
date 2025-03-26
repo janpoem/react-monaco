@@ -5,7 +5,8 @@
   "scripts": {
     "exports-tm": "bun scripts/exports-vscode-tm.ts --watch",
     "build": "bun -F './packages/*' --build",
-    "dev": "bun -F './packages/*' dev"
+    "dev": "bun -F './packages/*' dev",
+    "format-asset-json": "bun scripts/format-assets-json.ts"
   },
   "dependencies": {},
   "devDependencies": {
