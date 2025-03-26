@@ -13,9 +13,9 @@ type MaybePromise<T> = T | Promise<T>;
 
 // biome-ignore lint/suspicious/noExplicitAny: 允许 any 用于类型推断
 export type EmitterImpl<EventParams = Record<PropertyKey, any>> = {
-  emit: <K extends keyof EventParams>(
+  emit: <K extends keyof EventParams, P = EventParams[K]>(
     name: K,
-    params: EventParams[K],
+    params: P,
   ) => MaybePromise<void>;
 };
 
@@ -37,10 +37,13 @@ export type RemoteAsset = {
 /******************************************************************************
  * callback/event params
  ******************************************************************************/
-export type RemotePrepareAssetsParams<Query = object> = {
+export interface RemoteCommonParams<Query = object> {
   readonly props: RemoteLoaderAssetsProps<Query>;
+}
+
+export type RemotePrepareAssetsParams<Query = object> = {
   preloadAssets: RemoteAsset[];
-};
+} & RemoteCommonParams<Query>;
 
 export type RemoteMakeIdParams = {
   asset: RemoteAsset;
@@ -48,39 +51,40 @@ export type RemoteMakeIdParams = {
 };
 
 export type RemoteShouldPreloadParams<Query = object> = {
-  readonly props: RemoteLoaderAssetsProps<Query>;
   asset: RemoteAsset;
-};
+} & RemoteCommonParams<Query>;
 
 export type RemoteShouldReloadParams<Query = object> = {
-  readonly props: RemoteLoaderAssetsProps<Query>;
   asset: RemoteAsset;
-};
+} & RemoteCommonParams<Query>;
 
 export type RemoteOnDownloadAssetParams<Query = object> = {
-  readonly props: RemoteLoaderAssetsProps<Query>;
   preloadAssets: RemoteAsset[];
   queue: DownloadQueue;
   task: DownloadTask;
   asset: RemoteAsset;
-};
+} & RemoteCommonParams<Query>;
+
+export type RemoteOnHandleAssetParams<Query = object> = {
+  key: string;
+  index: number;
+  resultSet: RemoteResultSet;
+  handle: () => void;
+} & RemoteOnDownloadAssetParams<Query>;
 
 export type RemotePreloadAssetsParams<Query = object> = {
-  readonly props: RemoteLoaderAssetsProps<Query>;
   preloadAssets: RemoteAsset[];
   queue: DownloadQueue;
-};
+} & RemoteCommonParams<Query>;
 
-export type RemoteWillMountAssetsParams<Query = object> =
-  RemotePreloadAssetsParams<Query> & {
-    resultSet: RemoteResultSet;
-  };
+export type RemoteWillMountAssetsParams<Query = object> = {
+  resultSet: RemoteResultSet;
+} & RemotePreloadAssetsParams<Query>;
 
-export type RemoteOnMountAssetsParams<Query = object> =
-  RemotePreloadAssetsParams<Query> & {
-    resultSet: RemoteResultSet;
-    mounted: MountRemoteResult[];
-  };
+export type RemoteOnMountAssetsParams<Query = object> = {
+  resultSet: RemoteResultSet;
+  mounted: MountRemoteResult[];
+} & RemotePreloadAssetsParams<Query>;
 
 export type RemoteOnLoadAssetsParams<Query = object> = {
   readonly props: RemoteLoaderAssetsProps<Query>;
@@ -119,7 +123,9 @@ export type RemoteLoaderCallbacks<Query = object> = {
   handlePreload?: (
     params: RemotePreloadAssetsParams<Query>,
   ) => MaybePromise<RemoteResultSet>;
-  onDownloadAsset?: (params: RemoteOnDownloadAssetParams) => void;
+  onDownloadAsset?: (
+    params: RemoteOnDownloadAssetParams<Query>,
+  ) => MaybePromise<void>;
   onPreload?: (params: RemotePreloadAssetsParams<Query>) => MaybePromise<void>;
   willMount?: (
     params: RemoteWillMountAssetsParams<Query>,
@@ -136,6 +142,8 @@ export type RemoteLoaderProps<Query = object> = RemoteLoaderAssetsProps<Query> &
 /******************************************************************************
  * events
  ******************************************************************************/
+type AssetWithKey = `asset:${string}`;
+
 /**
  * RemoteLoader 事件定义
  *
@@ -154,6 +162,9 @@ export type RemoteLoaderEventsDefinition<Query = object> = {
   willMountAssets: RemoteWillMountAssetsParams<Query>;
   mountAssets: RemoteOnMountAssetsParams<Query>;
   loadAssets: RemoteOnLoadAssetsParams<Query>;
+  downloadAsset: RemoteOnDownloadAssetParams<Query>;
+  asset: RemoteOnHandleAssetParams<Query>;
+  [K: `asset:${string}`]: RemoteOnHandleAssetParams<Query>;
 };
 
 export type PreloadOptions<
@@ -282,7 +293,7 @@ const useRemoteLoader = <
     query,
     assets,
     isCompressed = false,
-    isFetchDownload = false,
+    isFetchDownload = true,
     makeId,
     onPrepare,
     shouldPreload,
@@ -300,7 +311,7 @@ const useRemoteLoader = <
 ) => {
   // key 不动态更新
   const keyRef = useRef(key);
-  // biome-ignore format: not formatter here
+  // biome-ignore format: no format here
   const props = {
     key: keyRef.current,
     baseUrl, query, assets, isCompressed, isFetchDownload,
@@ -474,12 +485,14 @@ const useRemoteLoader = <
           updateState({ percent });
         }
       },
-      onComplete: (queue, task) => {
+      onComplete: async (queue, task) => {
         const index = queue.tasks.findIndex((it) => it.id === task.id);
         const asset = preloadAssets[index];
         if (asset != null) {
           loadAsset(task, asset);
-          onDownloadAsset?.({ props, preloadAssets, queue, task, asset });
+          const _params = { props, preloadAssets, queue, task, asset };
+          await onDownloadAsset?.(_params);
+          await emitter?.emit('downloadAsset', _params);
         }
       },
     });
@@ -553,18 +566,20 @@ const useRemoteLoader = <
     return 'js';
   }
 
-  function internalHandlePreload({
+  async function internalHandlePreload({
+    props,
     queue,
     preloadAssets,
-  }: RemotePreloadAssetsParams<Query>): RemoteResultSet {
+  }: RemotePreloadAssetsParams<Query>): Promise<RemoteResultSet> {
     const mount: RemoteAsset[] = [];
     const wasm: Record<string, Uint8Array> = {};
     const blobUrls: Record<string, string> = {};
     const json: Record<string, unknown> = {};
     const text: Record<string, string> = {};
     const errors: Record<string, unknown> = {};
+    const resultSet = { mount, wasm, blobUrls, json, text, errors };
 
-    for (const [index, asset] of preloadAssets.entries()) {
+    for await (const [index, asset] of preloadAssets.entries()) {
       const type = inferAssetType(asset);
       const { key, mimeType } = asset;
       const task = queue.tasks[index];
@@ -572,6 +587,19 @@ const useRemoteLoader = <
       if (task == null || task.chunks == null) {
         errors[key] = new AssetError(Errors.RESP_CHUNKS_NULL, asset);
         continue;
+      }
+
+      if (emitter != null) {
+        let isHandle = false;
+        // biome-ignore format: not formatter here
+        const params: RemoteOnHandleAssetParams<Query> = {
+          props, preloadAssets, queue,
+          key, index, asset, task, resultSet,
+          handle: () => { isHandle = true }
+        };
+        await emitter.emit('asset', params);
+        if (!isHandle) await emitter.emit(`asset:${key}`, params);
+        if (isHandle) continue;
       }
 
       // blob 优先处理
@@ -613,7 +641,7 @@ const useRemoteLoader = <
       }
     }
 
-    return { mount, wasm, blobUrls, json, text, errors };
+    return resultSet;
   }
 };
 
