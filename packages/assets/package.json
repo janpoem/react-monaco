@@ -20,6 +20,6 @@
   "module": "dist/esm/index.js",
   "types": "dist/esm/index.d.ts",
   "type": "module",
-  "files": ["locels", "themes", "tm"],
+  "files": ["assets"],
   "scripts": {}
 }
