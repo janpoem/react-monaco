@@ -23,8 +23,6 @@ import type {
   TextmateScope,
 } from './types';
 
-let isLoadWasm = false;
-
 export class TextmateEventsDelegator extends BaseEventsDelegator<MonacoEventsDefinition> {
   wasmKey = 'wasm/onigasm';
 
@@ -71,9 +69,8 @@ export class TextmateEventsDelegator extends BaseEventsDelegator<MonacoEventsDef
     task,
     handle,
   }: MonacoEventsDefinition['asset']) => {
-    if (!isLoadWasm && task.chunks != null) {
+    if (task.chunks != null) {
       try {
-        isLoadWasm = true;
         await loadVSCodeOnigasmWasm(task.chunks.buffer as ArrayBuffer);
         this.vsOnigurumaLib = Promise.resolve({
           createOnigScanner: (patterns) => new OnigScanner(patterns),

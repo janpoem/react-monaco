@@ -61,7 +61,7 @@ export default [
         exclude: /node_modules/,
         tsconfig: 'tsconfig.json',
         jsc: {
-          target: 'es2021',
+          target: 'es2022',
         },
       }),
       nodeResolve({}),

@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "lib": ["esnext", "DOM", "DOM.Iterable"],
-    "target": "ES2021",
+    "target": "ES2022",
     "module": "ES2022",
     "jsx": "react-jsx",
     "moduleDetection": "force",
@@ -19,5 +19,4 @@
     "noPropertyAccessFromIndexSignature": false
   },
   "include": ["src"]
-  //  "extends": ["vscode-textmate-backup"]
 }

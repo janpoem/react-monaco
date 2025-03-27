@@ -9,7 +9,9 @@ React Monaco Editor Textmate 运行时注入插件。
 鉴于 `monaco-editor-textmate`、`monaco-textmate` 皆日久失修（`monaco-textmate` 已经是
 7 年前的，而实际上他也是 fork 自 `vscode-textmate`）。
 
-不过还是再次感谢 [Neek Sandhu](https://github.com/zikaari) ，他实现的方案有他的优势。
+不过还是再次感谢 [Neek Sandhu](https://github.com/zikaari) ，他的高亮比 `vscode-textmate`
+要准（比如 scss，主要是 theme 也是反向导入进来的，所以不可能和 vscode theme 100%
+对得上）。
 
 `monaco-textmate` 最大的问题是他默认使用 `node:path` ，这使的给 web
 打包的时候特别麻烦：[issue: Getting a build warning regarding path usage](https://github.com/zikaari/monaco-textmate/issues/11) 。
@@ -24,19 +26,19 @@ React Monaco Editor Textmate 运行时注入插件。
 
 ### 特别注意
 
-1. `vscode-textmate` 对 `scopeName` 的检查，更加严格了。 
+1. `vscode-textmate` 对 `scopeName` 的检查，更加严格了。
 
-    必须与 tmLanguage 声明文件中的 scopeName
-    保持一致，比如：[vscode/scss.tmLanguage.json](https://github.com/microsoft/vscode/blob/main/extensions/scss/syntaxes/scss.tmLanguage.json)
-    
-    这个文件里的 `"scopeName": "source.css.scss"` 所以 scopeName 也必须是
-    `source.css.scss` ，不然就会无法找到对应的匹配。
-    
-    所以除了在 `provider` 实现函数的返回结果增加了可选的 `scopeName` 外，也额外增加一个
-    `filter` 方法，用于最后拦截构成 loadGrammar 的必要代码集。
+   必须与 tmLanguage 声明文件中的 scopeName
+   保持一致，比如：[vscode/scss.tmLanguage.json](https://github.com/microsoft/vscode/blob/main/extensions/scss/syntaxes/scss.tmLanguage.json)
+
+   这个文件里的 `"scopeName": "source.css.scss"` 所以 scopeName 也必须是
+   `source.css.scss` ，不然就会无法找到对应的匹配。
+
+   所以除了在 `provider` 实现函数的返回结果增加了可选的 `scopeName` 外，也额外增加一个
+   `filter` 方法，用于最后拦截构成 loadGrammar 的必要代码集。
 
 2. 再补充，理论上是支持 plist 的（但我实际测试好几个 plist 效果都不好），
-`vscode-textmate` 根据文件名（URL）后缀自动做了检查。
+   `vscode-textmate` 根据文件名（URL）后缀自动做了检查。
 
 ## 使用说明
 
