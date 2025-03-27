@@ -19,4 +19,5 @@
     "noPropertyAccessFromIndexSignature": false
   },
   "include": ["src"]
+  //  "extends": ["vscode-textmate-backup"]
 }

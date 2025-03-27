@@ -1,10 +1,15 @@
 {
   "name": "@react-monaco/plugin-textmate",
   "version": "1.0.0",
-  "description": "Textmate injection plugin for react monaco editor",
+  "description": "Textmate injection plugin for react monaco editor.",
   "author": "Jiankai Zeng <janpoem@163.com>",
   "license": "MIT",
-  "keywords": ["preset provider", "preset components", "preset texts", "react"],
+  "keywords": [
+    "monaco textmate plugin",
+    "monaco editor",
+    "monaco plugin",
+    "monaco textmate"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/janpoem/react-monaco.git"
@@ -40,9 +45,8 @@
   "dependencies": {
     "react": "^19.0.0",
     "@react-monaco/core": "workspace:*",
-    "monaco-editor-textmate": "^4.0.0",
-    "monaco-textmate": "^3.0.1",
-    "onigasm": "^2.2.5"
+    "vscode-oniguruma": "^2.0.1",
+    "vscode-textmate": "^9.2.0"
   },
   "devDependencies": {
     "@types/react": "^19.0.10",

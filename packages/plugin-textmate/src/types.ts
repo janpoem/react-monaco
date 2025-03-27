@@ -10,13 +10,18 @@ export type TextmateActiveLanguage = {
 
 export type TextmateProvider = {
   url: string | URL;
-  format: 'json' | 'plist';
+  // format: 'json' | 'plist';
   languageId: string;
+  scopeName?: string;
 };
 
 export type TextmateProviderCallback = (
   params: MonacoEventsDefinition['prepareModel'],
 ) => TextmateProvider | undefined;
+
+export type TextmateFilterCodeSetCallback = (
+  code: TextmateCodeSet,
+) => TextmateCodeSet;
 
 export type TextmateInjectionProps = {
   onigasmWasmUrl?: string | URL;
@@ -24,12 +29,19 @@ export type TextmateInjectionProps = {
   provider?: TextmateProviderCallback;
   tmBaseUrl?: string | URL;
   onChange?: (state: TextmateActiveLanguage) => void;
+  filter?: TextmateFilterCodeSetCallback;
+  debug?: boolean;
 };
 
-export type CurrentCode = {
+export type TextmateScope = {
+  scopeName: string;
+  tmName: string;
+};
+
+export type TextmateCodeSet = {
   isWired: boolean;
   extname?: string;
   language?: monaco.languages.ILanguageExtensionPoint;
   languageId: string;
   provider?: TextmateProvider;
-};
+} & TextmateScope;
