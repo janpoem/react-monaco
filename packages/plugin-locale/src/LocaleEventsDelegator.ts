@@ -1,0 +1,82 @@
+import {
+  BaseEventsDelegator,
+  type MonacoEventsDefinition,
+  updateMonacoEnvironment,
+} from '@react-monaco/core';
+import { isInferObj } from '@zenstone/ts-utils/object';
+import { notEmptyStr } from '@zenstone/ts-utils/string';
+import { MonacoLocales } from './locales';
+import type { LocaleInjectionProps } from './types';
+
+declare global {
+  interface Window {
+    MonacoLocales?: Record<string, unknown> | undefined;
+  }
+}
+
+export class LocaleEventsDelegator extends BaseEventsDelegator<MonacoEventsDefinition> {
+  locale?: string;
+
+  assetKey = '';
+
+  constructor(public readonly props: LocaleInjectionProps) {
+    super();
+    this.locale = props.locale;
+    this.register('prepareAssets').register('asset').register('mounting');
+  }
+
+  prepareAssets = ({
+    preloadAssets,
+  }: MonacoEventsDefinition['prepareAssets']) => {
+    const locale = MonacoLocales.find((it) => it.key === this.locale);
+    if (locale == null) {
+      this.isDebug && console.log(`Locale: unknown locale '${this.locale}'`);
+      return;
+    }
+
+    if (window.MonacoLocales?.[locale.key] != null) {
+      updateMonacoEnvironment({ locale: locale.key });
+      this.isDebug && console.log(`Locale: '${this.locale}' is loaded`);
+      return;
+    }
+
+    this.assetKey = `locale/${locale.key}`;
+    preloadAssets.push({
+      key: this.assetKey,
+      url: new URL(`${locale.key}.json`, this.props.baseUrl || location.origin),
+      priority: -1000,
+      type: 'json',
+    });
+    this.isDebug &&
+      console.log(`Locale: add asset '${this.assetKey}' to preload`);
+  };
+
+  asset = ({ key, handle, task }: MonacoEventsDefinition['asset']) => {
+    if (notEmptyStr(this.locale) && this.assetKey === key) {
+      try {
+        const json = JSON.parse(new TextDecoder().decode(task.chunks));
+        if (isInferObj(json)) {
+          this.injectLocale(this.locale, json);
+        }
+      } catch (err) {
+        console.error(`Locale ${this.locale} JSON parse error`, err);
+      }
+      handle();
+    }
+  };
+
+  injectLocale = (locale: string, data: Record<string, unknown>) => {
+    if (window.MonacoLocales == null) window.MonacoLocales = {};
+    window.MonacoLocales[locale] = data;
+    updateMonacoEnvironment({ locale });
+    this.isDebug &&
+      console.log(`Locale: inject locale '${locale}' into MonacoEnvironment`);
+  };
+
+  switchLocale = async (locale?: string) => {
+    if (typeof monaco === 'undefined') return;
+    this.locale = locale;
+    // biome-ignore lint/performance/noDelete: <explanation>
+    delete window.MonacoEnvironment;
+  };
+}
