@@ -20,6 +20,8 @@
     "react-router": "^7.3.0",
     "@react-monaco/core": "workspace:*",
     "@react-monaco/plugin-textmate": "workspace:*",
+    "@react-monaco/plugin-locale": "workspace:*",
+    "@react-monaco/plugin-theme": "workspace:*",
     "@zenstone/preset-provider": "workspace:*",
     "@zenstone/use-remote-loader": "workspace:*",
     "@emotion/css": "^11.13.5",
