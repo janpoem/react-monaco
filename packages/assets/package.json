@@ -21,5 +21,7 @@
   "types": "dist/esm/index.d.ts",
   "type": "module",
   "files": ["assets"],
-  "scripts": {}
+  "scripts": {
+    "publish": "bun publish --access public"
+  }
 }
