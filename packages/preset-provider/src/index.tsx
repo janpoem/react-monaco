@@ -1,4 +1,4 @@
-import { notEmptyStr } from '@zenstone/ts-utils/string';
+import { notEmptyStr } from '@zenstone/ts-utils';
 import {
   type ComponentProps,
   type ComponentType,

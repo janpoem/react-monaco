@@ -21,7 +21,7 @@ const rmdir = (dir: string, enable = true) => {
   };
 };
 
-const external: string[] = ['react', 'react/jsx-runtime'];
+const external: string[] = ['react', 'react/jsx-runtime', '@zenstone/ts-utils'];
 const dtsExternal: string[] = [];
 const entry = 'src/index.tsx';
 
@@ -54,7 +54,7 @@ export default [
         exclude: /node_modules/,
         tsconfig: 'tsconfig.json',
         jsc: {
-          target: 'es2021',
+          target: 'es2022',
         },
       }),
       nodeResolve({}),
