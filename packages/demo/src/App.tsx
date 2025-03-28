@@ -1,4 +1,5 @@
 import { css } from '@emotion/css';
+import Settings from '@mui/icons-material/Settings';
 import {
   Box,
   Button,
@@ -41,18 +42,18 @@ import {
   ThemeSelect,
   TopBar,
 } from './toolbar';
+import EditOptions from './toolbar/EditOptions';
 import type { NextTheme, SampleStorageData } from './types';
 
 const editorOptions: MonacoCodeEditorProps['options'] = {
   lineHeight: 1.5,
   tabSize: 2,
   fontSize: 16,
-  fontWeight: '300',
-  fontFamily: 'var(--font-mono)',
+  // fontWeight: '300',
+  fontFamily: 'Roboto Mono',
   fontLigatures: 'no-common-ligatures, slashed-zero',
   letterSpacing: 0.025,
   minimap: { enabled: false },
-  theme: 'vs',
   scrollbar: {
     verticalHasArrows: false,
     horizontalHasArrows: false,
@@ -97,7 +98,7 @@ const App = () => {
     'monaco-sample-data',
     {},
   );
-  const { locale, theme, filename } = sampleData;
+  const { locale, theme, filename, customOptions } = sampleData;
 
   const [nextTheme, setNextTheme] = useState<NextTheme>({ loading: false });
 
@@ -111,17 +112,18 @@ const App = () => {
   const [options, muiTheme, themeColors] = useMemo(() => {
     const { name, colors, isDark } = revertMonacoThemeSkeleton(theme);
     return [
-      { ...editorOptions, theme: name },
+      { ...editorOptions, ...(customOptions ?? {}), theme: name },
       createTheme(isDark, colors),
       colors,
     ];
-  }, [theme]);
+  }, [theme, customOptions]);
 
   const [activeLanguage, setActiveLanguage] = useState<
     TextmateActiveLanguage | undefined
   >();
 
-  const [openDialog, setOpenDialog] = useState(false);
+  const [openThemeConverter, setOpenThemeConverter] = useState(false);
+  const [openEditOptions, setOpenEditOptions] = useState(false);
 
   const update = (frag: Partial<SampleStorageData>) =>
     storeSample((prev) => ({ ...prev, ...frag }));
@@ -130,8 +132,16 @@ const App = () => {
     <ThemeProvider theme={muiTheme}>
       <CssBaseline />
       <ThemeConverter.Dialog
-        open={openDialog}
-        onClose={() => setOpenDialog(false)}
+        open={openThemeConverter}
+        onClose={() => setOpenThemeConverter(false)}
+      />
+      <EditOptions
+        open={openEditOptions}
+        onClose={() => setOpenEditOptions(false)}
+        onSubmit={(nextOptions) => {
+          update({ customOptions: nextOptions });
+        }}
+        options={customOptions ?? options}
       />
       <MonacoProvider
         loader={{ baseUrl: monacoBaseUrl, query: { locale } }}
@@ -189,8 +199,14 @@ const App = () => {
             onChange={(name) => setNextTheme({ name, loading: true })}
           />
           <Box display={'flex'} sx={{ ml: 'auto' }} gap={'4px'}>
-            <Button size={'medium'} onClick={() => setOpenDialog(true)}>
+            <Button size={'medium'} onClick={() => setOpenThemeConverter(true)}>
               Theme Converter
+            </Button>
+            <Button
+              sx={{ minWidth: 'auto' }}
+              onClick={() => setOpenEditOptions(true)}
+            >
+              <Settings />
             </Button>
           </Box>
         </TopBar>

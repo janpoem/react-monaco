@@ -1,11 +1,8 @@
 :root {
-  --font-sans-inject: "Inter";
-  --font-mono-inject: "JetBrains Mono";
-  --font-sans: var(--font-sans-inject), "Noto Sans SC", "PingFang SC",
-    "Microsoft YaHei UI", "Microsoft YaHei", "Segoe UI", sans-serif;
-  --font-mono: var(--font-mono-inject), "Roboto Mono", "Noto Sans SC",
-    "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", "Segoe UI",
-    monospace;
+  --font-sans: "Inter", "Noto Sans SC", "PingFang SC", "Microsoft YaHei UI",
+    "Microsoft YaHei", "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", "Roboto Mono", "Noto Sans SC", "PingFang SC",
+    "Microsoft YaHei UI", "Microsoft YaHei", "Segoe UI", monospace;
 
   font-size: 14px;
   line-height: 1.5;

@@ -211,7 +211,7 @@ const customTmProvider: TextmateProviderCallback = ({ language, extname }) => {
 };
 
 const filterTmCodeSet: TextmateFilterCodeSetCallback = (
-  code: TextmateCodeSet,
+  code: TextmateCodeSet
 ) => {
   return code;
 };

@@ -5,16 +5,19 @@ import pkg from './package.json';
 export default defineConfig({
   tools: {
     rspack: {
-      plugins: [
-        new rspack.CopyRspackPlugin({
-          patterns: [{ from: '../assets/assets', to: 'assets' }],
-        }),
-      ],
+      plugins:
+        process.env.NODE_ENV === 'production'
+          ? []
+          : [
+              new rspack.CopyRspackPlugin({
+                patterns: [{ from: '../assets/assets', to: 'assets' }],
+              }),
+            ],
     },
   },
   plugins: [pluginReact()],
   html: {
-    title: '@react-monaco/core demo base on rsbuild',
+    title: '@react-monaco/core demo development on rsbuild',
     template: './src/index.html',
   },
   output: {
