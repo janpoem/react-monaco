@@ -1,8 +1,7 @@
 :root {
   --font-sans: "Inter", "Noto Sans SC", "PingFang SC", "Microsoft YaHei UI",
     "Microsoft YaHei", "Segoe UI", sans-serif;
-  --font-mono: "JetBrains Mono", "Roboto Mono", "Noto Sans SC", "PingFang SC",
-    "Microsoft YaHei UI", "Microsoft YaHei", "Segoe UI", monospace;
+  --font-mono: "JetBrains Mono", "Roboto Mono", monospace;
 
   font-size: 14px;
   line-height: 1.5;

@@ -1,6 +1,6 @@
 {
   "name": "@react-monaco/demo",
-  "version": "0.1.0",
+  "version": "0.1.3",
   "description": "",
   "license": "MIT",
   "type": "module",
@@ -33,9 +33,7 @@
     "@zenstone/ts-utils": "^0.0.10",
     "just-compare": "^2.3.0",
     "@estruyf/vscode-theme-converter": "^1.1.0",
-    "change-case": "^5.4.4",
-    "json-edit-react": "^1.25.0",
-    "ajv": "^8.17.1"
+    "change-case": "^5.4.4"
   },
   "devDependencies": {
     "@rsbuild/core": "^1.2.14",

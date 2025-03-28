@@ -67,7 +67,7 @@ export const createTheme = (
     typography: {
       fontSize: 14,
       htmlFontSize: 16,
-      fontFamily: 'var(--rm-font)',
+      fontFamily: 'var(--font-sans)',
       button: {
         textTransform: 'none',
       },
