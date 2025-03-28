@@ -21,7 +21,13 @@ const rmdir = (dir: string, enable = true) => {
   };
 };
 
-const external = ['react'];
+const external = [
+  'react',
+  'just-compare',
+  '@zenstone/ts-utils',
+  '@zenstone/ts-utils/fetch-download',
+  '@zenstone/ts-utils/remote',
+];
 const dtsExternal = external;
 const entry = 'src/index.ts';
 
@@ -54,7 +60,7 @@ export default [
         exclude: /node_modules/,
         tsconfig: 'tsconfig.json',
         jsc: {
-          target: 'es2021',
+          target: 'es2022',
         },
       }),
       nodeResolve({}),

@@ -1,10 +1,10 @@
+import { notEmptyStr } from '@zenstone/ts-utils';
 import { DownloadQueue, DownloadTask } from '@zenstone/ts-utils/fetch-download';
 import {
   mountRemote,
   type MountRemoteResult,
   unmountRemote,
 } from '@zenstone/ts-utils/remote';
-import { notEmptyStr } from '@zenstone/ts-utils/string';
 import { useRef, useState } from 'react';
 import compare from './compare';
 import { useInterval, useIsomorphicLayoutEffect } from './usehooks-ts';
@@ -426,10 +426,10 @@ const useRemoteLoader = <
   async function prepare({
     props,
   }: RemotePreloadState<Query>): Promise<Partial<RemotePreloadState<Query>>> {
-    const preloadAssets: RemoteAsset[] = [];
+    let preloadAssets: RemoteAsset[] = [];
     const params = { props, preloadAssets };
 
-    for (const origAsset of props.assets) {
+    for await (const origAsset of props.assets) {
       const url = newUrl(origAsset.url, origAsset.baseUrl || props.baseUrl);
       const asset = { ...origAsset, url };
       if (loadedUrlMap.has(url.toString())) {
@@ -443,10 +443,10 @@ const useRemoteLoader = <
       preloadAssets.push(asset);
     }
 
-    if (preloadAssets.length) preloadAssets.sort(orderAssets);
-
     await onPrepare?.(params);
     await emitter?.emit('prepareAssets', params);
+
+    if (preloadAssets.length) preloadAssets = preloadAssets.sort(orderAssets);
 
     return { process: RemoteLoadProcess.Preload, preloadAssets };
   }
