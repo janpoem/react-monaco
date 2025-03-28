@@ -24,10 +24,4 @@ const main = (items: string[]) => {
   }
 };
 
-main(
-  globSync([
-    './packages/assets/locales/*.json',
-    './packages/assets/themes/*.json',
-    './packages/assets/tm/*.json',
-  ]),
-);
+main(globSync(['./packages/assets/assets/**/*.json']));

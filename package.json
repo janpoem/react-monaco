@@ -22,7 +22,10 @@
     "glob": "^11.0.1",
     "dayjs": "^1.11.13",
     "ansi-colors": "^4.1.3",
-    "@zenstone/ts-utils": "^0.0.10"
+    "@zenstone/ts-utils": "^0.0.10",
+    "@semver-sync/sync": "^1.0.1",
+    "semver": "^7.7.1",
+    "@types/semver": "^7.7.0"
   },
   "peerDependencies": {
     "typescript": "^5"

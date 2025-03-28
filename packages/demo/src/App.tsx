@@ -16,13 +16,21 @@ import {
   type TextmateFilterCodeSetCallback,
   TextmateInjection,
   type TextmateProviderCallback,
-  tmBaseUrlDefault,
+  tmConfig,
 } from '@react-monaco/plugin-textmate';
-import { useMemo, useRef } from 'react';
+import { createThemesPlugin } from '@react-monaco/plugin-themes';
+import { useMemo, useRef, useState } from 'react';
 import { useLocalStorage } from 'usehooks-ts';
+import { assetsOf } from './presets';
 import { createTheme } from './theme';
-import { FileSelect, FileSelectOptions, LocaleSelect, TopBar } from './toolbar';
-import type { SampleStorageData } from './types';
+import {
+  FileSelect,
+  FileSelectOptions,
+  LocaleSelect,
+  ThemeSelect,
+  TopBar,
+} from './toolbar';
+import type { NextTheme, SampleStorageData } from './types';
 
 const baseUrl = 'https://static.summererp.com/misc/monaco-editor/0.52.2/';
 
@@ -60,6 +68,19 @@ const cssScrollBar = css`
   }
 `;
 
+const { themes, ThemesInjection } = createThemesPlugin({
+  themes: [
+    { key: 'atom-material-theme', name: 'Atom Material Theme' },
+    { key: 'atom-one-light', name: 'Atom One Light' },
+    { key: 'atomize', name: 'Atomize(Atom One Dark)' },
+    { key: 'csb-default', name: 'CSB Default' },
+    { key: 'github-light', name: 'GitHub Light' },
+    { key: 'webstorm-darcula', name: 'Webstorm Darcula' },
+    { key: 'webstorm-dark', name: 'Webstorm Dark' },
+  ],
+  // baseUrl: assetsOf('themes'),
+});
+
 const App = () => {
   const ref = useRef<MonacoCodeEditorRef | null>(null);
 
@@ -69,6 +90,8 @@ const App = () => {
   );
   const { locale, theme, filename } = sampleData;
 
+  const [nextTheme, setNextTheme] = useState<NextTheme>({ loading: false });
+
   const input = useMemo(
     () =>
       FileSelectOptions.find((it) => it.filename === filename) ??
@@ -77,10 +100,7 @@ const App = () => {
   );
 
   const [options, muiTheme, themeColors] = useMemo(() => {
-    const { name, colors, isDark } = revertMonacoThemeSkeleton(
-      'atom-material-theme',
-    );
-    console.log(name, colors, isDark);
+    const { name, colors, isDark } = revertMonacoThemeSkeleton(theme);
     return [
       { ...editorOptions, theme: name },
       createTheme(isDark, colors),
@@ -117,10 +137,23 @@ const App = () => {
           // onChange={(active) => console.log(active)}
           provider={customTmProvider}
           filter={filterTmCodeSet}
+          baseUrl={assetsOf('tm')}
         />
         <LocaleInjection
           locale={locale}
-          baseUrl={`${location.origin}/assets/locales/`}
+          // baseUrl={assetsOf('locales')}
+        />
+        <ThemesInjection
+          debug
+          theme={options.theme}
+          loadTheme={nextTheme.name}
+          onLoad={(res) => {
+            if (res.isSuccess) {
+              const { name, isDark, colors } = res.theme;
+              update({ theme: { name, isDark, colors } });
+            }
+            setNextTheme((prev) => ({ ...prev, loading: false }));
+          }}
         />
         <TopBar>
           <LocaleSelect
@@ -130,6 +163,12 @@ const App = () => {
           <FileSelect
             value={input}
             onChange={(it) => update({ filename: it.filename })}
+          />
+          <ThemeSelect
+            value={options.theme}
+            themes={themes}
+            disabled={nextTheme.loading}
+            onChange={(name) => setNextTheme({ name, loading: true })}
           />
         </TopBar>
         <MonacoCodeEditor
@@ -162,14 +201,14 @@ const ProgressBar = ({
 const customTmProvider: TextmateProviderCallback = ({ language, extname }) => {
   if (extname === '.prisma') {
     return {
-      url: new URL('prisma.tmLanguage.json', tmBaseUrlDefault),
+      url: new URL('prisma.tmLanguage.json', tmConfig('baseUrl')),
       format: 'json',
       languageId: 'prisma',
     };
   }
   if (language?.id === 'kotlin') {
     return {
-      url: new URL('kotlin.tmLanguage.json', `${location.origin}/tm/`),
+      url: new URL('kotlin.tmLanguage.json', tmConfig('baseUrl')),
       format: 'json',
       languageId: language.id,
       scopeName: 'source.gradle-kotlin-dsl',

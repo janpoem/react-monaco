@@ -5,3 +5,8 @@ export type SampleStorageData = {
   filename?: string;
   theme?: MonacoThemeInput;
 };
+
+export type NextTheme = {
+  name?: string;
+  loading: boolean;
+};
