@@ -13,8 +13,7 @@ import {
   parseRawGrammar,
   Registry as VSCodeRegistry,
 } from 'vscode-textmate';
-import { onigasmWasmUrlDefault, tmBaseUrlDefault } from './constants';
-import { isTmSupportLanguage } from './languages';
+import { isTmSupportLanguage, tmConfig } from './config';
 import { wireTmGrammars } from './monaco-editor-textmate';
 import type {
   TextmateCodeSet,
@@ -46,14 +45,18 @@ export class TextmateEventsDelegator extends BaseEventsDelegator<MonacoEventsDef
       .register('editor');
   }
 
-  get tmBaseUrl() {
-    return this.props.tmBaseUrl || tmBaseUrlDefault;
+  get baseUrl() {
+    return this.props.baseUrl || tmConfig('baseUrl');
+  }
+
+  get onigurumaWasmUrl() {
+    return this.props.onigurumaWasmUrl || tmConfig('onigurumaWasmUrl');
   }
 
   get wasmAsset() {
     return {
       key: this.wasmKey,
-      url: new URL(this.props.onigasmWasmUrl || onigasmWasmUrlDefault),
+      url: new URL(this.onigurumaWasmUrl, this.baseUrl),
       priority: 100,
       type: 'wasm',
     };
@@ -248,12 +251,10 @@ export class TextmateEventsDelegator extends BaseEventsDelegator<MonacoEventsDef
       ): Promise<IRawGrammar | undefined | null> => {
         if (this.code == null) return null;
         try {
-          let url = new URL(
-            `${this.code.tmName}.tmLanguage.json`,
-            this.tmBaseUrl,
-          );
+          const baseUrl = this.baseUrl;
+          let url = new URL(`${this.code.tmName}.tmLanguage.json`, baseUrl);
           if (this.code.provider != null) {
-            url = new URL(this.code.provider.url);
+            url = new URL(this.code.provider.url, baseUrl);
           }
           this.isDebug &&
             console.log(

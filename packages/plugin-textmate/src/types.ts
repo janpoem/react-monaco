@@ -24,10 +24,9 @@ export type TextmateFilterCodeSetCallback = (
 ) => TextmateCodeSet;
 
 export type TextmateInjectionProps = {
-  onigasmWasmUrl?: string | URL;
-  onigasmJsUrl?: string | URL;
+  onigurumaWasmUrl?: string | URL;
   provider?: TextmateProviderCallback;
-  tmBaseUrl?: string | URL;
+  baseUrl?: string | URL;
   onChange?: (state: TextmateActiveLanguage) => void;
   filter?: TextmateFilterCodeSetCallback;
   debug?: boolean;

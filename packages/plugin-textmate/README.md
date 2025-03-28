@@ -82,12 +82,33 @@ const customTmProvider: TextmateProviderCallback = ({ language, extname }) => {
 const filterTmCodeSet: TextmateFilterCodeSetCallback = (
   code: TextmateCodeSet,
 ) => {
+  // 已经内部实现，这里只是作为一个示例
   if (code.languageId === 'python') {
     code.scopeName = 'source.python';
+  }
+  // 已经内部实现，这里只是作为一个示例
+  if (code.extname === '.tsx') {
+    code.tmName = 'typescriptreact';
   }
   return code;
 };
 ```
+
+## 配置
+
+目前内部预设为：
+
+```ts
+const config = {
+  onigurumaWasmUrl: 'https://cdn.jsdelivr.net/npm/vscode-oniguruma/release/onig.wasm',
+  baseUrl: 'https://cdn.jsdelivr.net/npm/@react-monaco/assets/assets/tm/',
+  languages: '....',
+};
+```
+
+可使用 `setupTextmate` 来重新配置。
+
+可通过 `txConfig('baseUrl')` 来取得当前的有效值。
 
 ## 类型说明
 
