@@ -4,6 +4,8 @@ import type { CSSProperties, ReactNode } from 'react';
 
 export type _MaybePromise<T> = T | Promise<T>;
 
+export type _ItOrCallback<T> = T | (() => T);
+
 export type _CommonProps = {
   className?: string;
   style?: CSSProperties;
@@ -180,4 +182,31 @@ export type MonacoCustomTheme = {
   data: monaco.editor.IStandaloneThemeData;
 };
 
+export type MonacoThemeFrag = {
+  name?: string;
+  isDark?: boolean;
+  colors?: Partial<MonacoThemeColors>;
+};
+
+export type MonacoThemeInput =
+  | undefined
+  | null
+  | boolean
+  | MonacoThemeFrag
+  | string;
+
+export type MonacoThemeSkeleton = {
+  name: string;
+  isDark: boolean;
+  colors: MonacoThemeColors;
+};
+
 export type MonacoCustomThemeCallback = () => MonacoCustomTheme;
+
+////////////////////////////////////////////////////////////////////////////////
+// MonacoEnvironment
+////////////////////////////////////////////////////////////////////////////////
+
+export type MonacoExtendEnvironment = monaco.Environment & {
+  locale?: string;
+};

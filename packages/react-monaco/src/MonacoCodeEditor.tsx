@@ -1,3 +1,4 @@
+import compare from 'just-compare';
 import {
   type CSSProperties,
   type ForwardedRef,
@@ -8,12 +9,9 @@ import {
   useRef,
 } from 'react';
 import { useEventCallback, useIsomorphicLayoutEffect } from 'usehooks-ts';
-import { useMonacoPreset } from './hooks';
-import {
-  type MonacoContextType,
-  MonacoReadyState,
-  useMonaco,
-} from './MonacoProvider';
+import { MonacoReadyState } from './constants';
+import { useMonacoPreset, useMonacoTransientState } from './hooks';
+import { type MonacoContextType, useMonaco } from './MonacoProvider';
 import { cssVerticalContainer, presetCls } from './styles';
 import type {
   MonacoCodeInput,
@@ -21,7 +19,7 @@ import type {
   MonacoModelChangeParams,
   MonacoModelCreateParams,
 } from './types';
-import { compare, extractExtname, isFileInput } from './utils';
+import { extractExtname, isFileInput } from './utils';
 
 export type MonacoCodeEditorRef = MonacoContextType & {
   containerRef: RefObject<HTMLDivElement | null>;
@@ -40,6 +38,8 @@ export type MonacoCodeEditorProps = {
   onModel?: (params: MonacoModelCreateParams) => void;
   onChange?: (params: MonacoModelChangeParams) => void;
   onMount?: (params: MonacoEditorMountParams) => void;
+  onFocus?: (params: MonacoEditorMountParams) => void;
+  onBlur?: (params: MonacoEditorMountParams) => void;
 };
 
 export const MonacoCodeEditor = forwardRef(
@@ -52,6 +52,8 @@ export const MonacoCodeEditor = forwardRef(
       onModel,
       onChange,
       onMount,
+      onFocus,
+      onBlur,
     }: MonacoCodeEditorProps,
     ref: ForwardedRef<MonacoCodeEditorRef>,
   ) => {
@@ -61,10 +63,15 @@ export const MonacoCodeEditor = forwardRef(
     const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | undefined>(
       undefined,
     );
+    const isFocusRef = useRef<boolean>(false);
 
     const onModelFn = useEventCallback(onModel);
     const onChangeFn = useEventCallback(onChange);
     const onMountFn = useEventCallback(onMount);
+    const onFocusFn = useEventCallback(onFocus);
+    const onBlurFn = useEventCallback(onBlur);
+
+    const { imaging } = useMonacoTransientState();
 
     const { getText } = useMonacoPreset();
     const monacoCtx = useMonaco();
@@ -185,31 +192,62 @@ export const MonacoCodeEditor = forwardRef(
         throw new Error(getText('ERR_NO_CONTAINER'));
       }
 
-      if (modelRef.current == null) {
-        modelRef.current = createModel(inputRef.current);
+      const { source, scroll, position } = imaging({
+        editor: editorRef.current,
+        model: modelRef.current,
+      });
+
+      modelRef.current = createModel(
+        source
+          ? {
+              ...inputRef.current,
+              source,
+            }
+          : inputRef.current,
+      );
+
+      if (editorRef.current != null) {
+        editorRef.current.dispose();
       }
 
-      if (editorRef.current == null) {
-        editorRef.current = _monaco.editor.create(containerRef.current, {
-          // value: inputRef.current.source || '',
-          model: modelRef.current,
-          automaticLayout: true,
-          scrollBeyondLastLine: false,
-          autoIndent: 'full',
-          formatOnPaste: true,
-          formatOnType: true,
-          fontLigatures: 'common-ligatures, slashed-zero',
-          ...options,
-        });
-        const params = {
-          mode: 'code',
-          monaco: _monaco,
-          editor: editorRef.current,
-          model: modelRef.current,
-        };
-        onMountFn?.(params);
-        emitterRef.current?.emit('editor', params);
+      const editor = _monaco.editor.create(containerRef.current, {
+        // value: inputRef.current.source || '',
+        model: modelRef.current,
+        automaticLayout: true,
+        scrollBeyondLastLine: false,
+        autoIndent: 'full',
+        formatOnPaste: true,
+        formatOnType: true,
+        fontLigatures: 'common-ligatures, slashed-zero',
+        ...options,
+      });
+
+      if (scroll) editor.setScrollPosition(scroll);
+      if (position) {
+        editor.focus();
+        editor.setPosition(position);
       }
+
+      const params = {
+        mode: 'code',
+        monaco: _monaco,
+        editor,
+        model: modelRef.current,
+      };
+
+      editor.onDidFocusEditorText(() => {
+        isFocusRef.current = true;
+        onFocusFn?.(params);
+      });
+      editor.onDidBlurEditorText(() => {
+        isFocusRef.current = false;
+        onBlurFn?.(params);
+      });
+
+      editorRef.current = editor;
+
+      onMountFn?.(params);
+      emitterRef.current?.emit('editor', params);
     }
   },
 );

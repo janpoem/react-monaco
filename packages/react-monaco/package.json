@@ -48,8 +48,6 @@
   },
   "dependencies": {
     "@emotion/css": "^11.13.5",
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.0",
     "@zenstone/preset-provider": "workspace:*",
     "@zenstone/ts-utils": "^0.0.10",
     "@zenstone/use-remote-loader": "workspace:*",

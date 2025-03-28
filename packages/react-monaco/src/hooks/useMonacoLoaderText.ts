@@ -1,4 +1,4 @@
-import { notEmptyStr } from '@zenstone/ts-utils/string';
+import { notEmptyStr } from '@zenstone/ts-utils';
 import { useMemo } from 'react';
 import { MonacoLoaderProcess } from '../constants';
 import { useMonacoPreset } from './useMonacoPreset';

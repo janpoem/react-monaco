@@ -10,6 +10,7 @@ export type PresetStyleVars = {
   '--rmBackdropZIndex': CSSProperties['zIndex'];
   '--rmGap': CSSProperties['gap'];
   '--rmBorderColor': CSSProperties['borderColor'];
+  '--rmTextColor': CSSProperties['color'];
 };
 
 export const presetStyleVars = (
@@ -19,6 +20,7 @@ export const presetStyleVars = (
   '--rmBackdropZIndex': 1000,
   '--rmGap': '0.5em',
   '--rmBorderColor': 'rgba(0, 0, 0, 0.16)',
+  '--rmTextColor': 'currentColor',
   ...mixin,
 });
 
@@ -72,12 +74,12 @@ export const cssErrDisplay = css`
   border-radius: 0.5em;
   border: 1px solid var(--rmBorderColor);
   padding: 1em;
-  box-shadow: var(--rmBorderColor) 0px 1px 4px;
+  color: var(--rmTextColor);
 `;
 
 export const cssErrScope = css`
   font-weight: 600;
-  opacity: 0.85;
+  opacity: 0.65;
   &:after {
     content: '';
     border-right: 1px solid var(--rmBorderColor);
@@ -111,4 +113,5 @@ export const cssLoaderBox = (dir: 'row' | 'column') =>
     display: 'flex',
     flexDirection: dir,
     gap: 'var(--rmGap)',
+    color: 'var(--rmTextColor)',
   });

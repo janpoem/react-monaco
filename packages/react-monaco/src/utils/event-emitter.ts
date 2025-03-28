@@ -1,4 +1,4 @@
-import { isInferObj } from '@zenstone/ts-utils/object';
+import { isInferObj } from '@zenstone/ts-utils';
 import Emittery from 'emittery';
 import { useRef } from 'react';
 import type {

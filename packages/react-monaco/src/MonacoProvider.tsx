@@ -3,6 +3,7 @@ import {
   usePresetProviderInit,
 } from '@zenstone/preset-provider';
 import type { RemoteOnMountAssetsParams } from '@zenstone/use-remote-loader';
+import compare from 'just-compare';
 import {
   createContext,
   type CSSProperties,
@@ -10,12 +11,15 @@ import {
   type ReactNode,
   type RefObject,
   type SetStateAction,
+  useCallback,
   useContext,
   useMemo,
   useRef,
   useState,
 } from 'react';
+import { useIsomorphicLayoutEffect } from 'usehooks-ts';
 import { ErrorWrapper } from './components';
+import { MonacoReadyState } from './constants';
 import { MonacoLoader, type MonacoLoaderProps } from './MonacoLoader';
 import {
   initComponents,
@@ -35,13 +39,12 @@ import type {
   EventsInput,
   MonacoEventsDefinition,
 } from './types';
-import { isWorkerAsset, isWorkerKey, useEventEmitterRef } from './utils';
-
-export enum MonacoReadyState {
-  Prepare = 0,
-  Mounting = 1,
-  Mounted = 2,
-}
+import {
+  isWorkerAsset,
+  isWorkerKey,
+  updateMonacoEnvironment,
+  useEventEmitterRef,
+} from './utils';
 
 export type MonacoContextType = {
   monacoRef: RefObject<typeof monaco | undefined>;
@@ -50,6 +53,7 @@ export type MonacoContextType = {
   setError: Dispatch<SetStateAction<unknown>>;
   readyState: MonacoReadyState;
   setReadyState: Dispatch<SetStateAction<MonacoReadyState>>;
+  lifecycleId: number;
   findLanguage(
     extname?: string | null,
   ): monaco.languages.ILanguageExtensionPoint | undefined;
@@ -64,6 +68,7 @@ const Context = createContext<MonacoContextType>({
   setError: () => void 0,
   readyState: MonacoReadyState.Prepare,
   setReadyState: () => void 0,
+  lifecycleId: 0,
   findLanguage: () => void 0,
   refMonaco: () => {
     throw new Error('Invalid runtime');
@@ -100,10 +105,14 @@ export const MonacoProvider = ({
   children,
   ...props
 }: MonacoProviderProps) => {
+  const queryRef = useRef(loader?.query);
   const monacoRef = useRef(refGlobalMonaco());
   const emitterRef = useEventEmitterRef(events);
   const [error, setError] = useState<unknown>(undefined);
   const [readyState, setReadyState] = useState(createReadyState);
+
+  const [lifecycleId, setLifecycleId] = useState(0);
+  const lifecycleIdRef = useRef(lifecycleId);
 
   const container = useMemo(
     () =>
@@ -118,6 +127,17 @@ export const MonacoProvider = ({
     components,
   });
 
+  useIsomorphicLayoutEffect(() => {
+    if (!compare(queryRef.current, loader?.query)) {
+      queryRef.current = loader?.query;
+      setLifecycleId((prev) => prev + 1);
+    }
+  }, [loader?.query]);
+
+  const shouldReload = useCallback(() => {
+    return lifecycleId !== lifecycleIdRef.current;
+  }, [lifecycleId]);
+
   return (
     <PresetProvider preset={preset}>
       <Context.Provider
@@ -128,6 +148,7 @@ export const MonacoProvider = ({
           setError,
           readyState,
           setReadyState,
+          lifecycleId,
           findLanguage,
           refMonaco,
           extendThemes,
@@ -143,8 +164,10 @@ export const MonacoProvider = ({
               emitter={emitterRef.current}
               onError={setError}
               onMount={onRemoteMount}
+              shouldReload={shouldReload}
               onLoad={() => {
-                // monacoRef.current = refMonaco();
+                // sync lifecycleIdRef
+                lifecycleIdRef.current = lifecycleId;
                 setReadyState(MonacoReadyState.Mounting);
               }}
             />
@@ -193,14 +216,13 @@ export const MonacoProvider = ({
         workers.push({ url, labels });
       }
     }
-    console.log({ editor, workers });
     if (editor == null) {
       throw new Error(preset.getText('ERR_NO_EDITOR_WORKER'));
     }
     if (!workers.length) {
       throw new Error(preset.getText('ERR_WORKERS_EMPTY'));
     }
-    window.MonacoEnvironment = {
+    updateMonacoEnvironment({
       getWorkerUrl: (_moduleId: string, label: string) => {
         for (const it of workers) {
           if (!it.labels.length) continue;
@@ -210,7 +232,7 @@ export const MonacoProvider = ({
         }
         return editor.url;
       },
-    };
+    });
   }
 
   function refMonaco() {

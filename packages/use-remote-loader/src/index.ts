@@ -21,7 +21,6 @@ export type EmitterImpl<EventParams = Record<PropertyKey, any>> = {
 
 export type RemoteType = 'js' | 'css' | 'json' | 'wasm' | 'txt' | string;
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export type RemoteAsset = {
   key: string;
   url: string | URL;

@@ -3,8 +3,7 @@ import {
   type MonacoEventsDefinition,
   updateMonacoEnvironment,
 } from '@react-monaco/core';
-import { isInferObj } from '@zenstone/ts-utils/object';
-import { notEmptyStr } from '@zenstone/ts-utils/string';
+import { isInferObj, notEmptyStr } from '@zenstone/ts-utils';
 import { localeConfig } from './config';
 import { MonacoLocales } from './locales';
 import type { LocaleInjectionProps } from './types';

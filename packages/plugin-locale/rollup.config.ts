@@ -25,9 +25,7 @@ const external: string[] = [
   'react',
   'react/jsx-runtime',
   '@react-monaco/core',
-  // 'monaco-editor-textmate',
-  // 'monaco-textmate',
-  // 'onigasm',
+  '@zenstone/ts-utils',
 ];
 const dtsExternal: string[] = external;
 const entry = 'src/index.ts';

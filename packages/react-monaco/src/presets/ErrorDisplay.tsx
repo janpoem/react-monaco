@@ -1,4 +1,5 @@
-import { errMsg } from '@zenstone/ts-utils/error';
+import { errMsg } from '@zenstone/ts-utils';
+import compare from 'just-compare';
 import { Fragment, useEffect, useMemo, useRef } from 'react';
 import { useMonacoSelectText } from '../hooks';
 import {
@@ -9,7 +10,6 @@ import {
   presetCls,
   styleFlexCC,
 } from '../styles';
-import { compare } from '../utils';
 import type { MonacoPresetErrorDisplayProps } from './_components';
 
 const ErrorDisplay = ({

@@ -1,4 +1,4 @@
-import { isStr } from '@zenstone/ts-utils/string';
+import { isStr } from '@zenstone/ts-utils';
 import type { RemoteAsset } from '@zenstone/use-remote-loader';
 
 const prefixCheck =
@@ -14,12 +14,6 @@ const prefixCheck =
   };
 
 export const isWorkerKey = prefixCheck('worker');
-
-export const isLocalKey = prefixCheck('locale');
-
-export const isJsonKey = prefixCheck('json');
-
-export const isCssKey = prefixCheck('css', true);
 
 export const isMainKey = prefixCheck('main', true);
 

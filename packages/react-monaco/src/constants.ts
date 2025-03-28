@@ -12,3 +12,10 @@ export enum MonacoLoaderProcess {
   Preparing = 'Preparing',
   Completed = 'Completed',
 }
+
+export enum MonacoReadyState {
+  Prepare = 0,
+  Mounting = 1,
+  Mounted = 2,
+  Reload = 3,
+}

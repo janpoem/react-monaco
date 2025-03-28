@@ -1,5 +1,4 @@
-import { isInferObj } from '@zenstone/ts-utils/object';
-import { notEmptyStr } from '@zenstone/ts-utils/string';
+import { isInferObj, notEmptyStr } from '@zenstone/ts-utils';
 import type {
   EventEmitter,
   EventsCallbacks,

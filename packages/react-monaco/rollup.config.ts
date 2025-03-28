@@ -25,13 +25,14 @@ const rmdir = (dir: string, enable = true) => {
 const external = [
   'react',
   'react/jsx-runtime',
+  'emittery',
+  'just-compare',
+  'usehooks-ts',
   '@emotion/styled',
   '@emotion/sheet',
   '@emotion/react',
   '@emotion/css',
   '@zenstone/ts-utils',
-  '@zenstone/ts-utils/string',
-  '@zenstone/ts-utils/error',
   '@zenstone/preset-provider',
   '@zenstone/use-remote-loader',
 ];
