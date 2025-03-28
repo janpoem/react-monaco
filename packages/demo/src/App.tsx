@@ -1,5 +1,11 @@
 import { css } from '@emotion/css';
-import { CssBaseline, LinearProgress, ThemeProvider } from '@mui/material';
+import {
+  Box,
+  Button,
+  CssBaseline,
+  LinearProgress,
+  ThemeProvider,
+} from '@mui/material';
 import {
   type DownloadingParams,
   MonacoCodeEditor,
@@ -21,11 +27,16 @@ import {
 import { createThemesPlugin } from '@react-monaco/plugin-themes';
 import { useMemo, useRef, useState } from 'react';
 import { useLocalStorage } from 'usehooks-ts';
-import { assetsOf, monacoBaseUrl } from './presets';
+import type { TextmateActiveLanguage } from '../../../src/plugins/textmate';
+import ThemeConverter from './experimental/theme-converter';
+import { TypescriptInjection } from './experimental/typescript';
+import { monacoBaseUrl } from './presets';
 import { createTheme } from './theme';
 import {
   FileSelect,
   FileSelectOptions,
+  FootBar,
+  LanguageDisplay,
   LocaleSelect,
   ThemeSelect,
   TopBar,
@@ -106,12 +117,22 @@ const App = () => {
     ];
   }, [theme]);
 
+  const [activeLanguage, setActiveLanguage] = useState<
+    TextmateActiveLanguage | undefined
+  >();
+
+  const [openDialog, setOpenDialog] = useState(false);
+
   const update = (frag: Partial<SampleStorageData>) =>
     storeSample((prev) => ({ ...prev, ...frag }));
 
   return (
     <ThemeProvider theme={muiTheme}>
       <CssBaseline />
+      <ThemeConverter.Dialog
+        open={openDialog}
+        onClose={() => setOpenDialog(false)}
+      />
       <MonacoProvider
         loader={{ baseUrl: monacoBaseUrl, query: { locale } }}
         style={{
@@ -131,18 +152,16 @@ const App = () => {
         }}
       >
         <TextmateInjection
-          debug={false}
-          // onChange={(active) => console.log(active)}
+          onChange={setActiveLanguage}
           provider={customTmProvider}
           filter={filterTmCodeSet}
-          baseUrl={assetsOf('tm')}
+          // baseUrl={assetsOf('tm')}
         />
         <LocaleInjection
           locale={locale}
           // baseUrl={assetsOf('locales')}
         />
         <ThemesInjection
-          debug
           theme={options.theme}
           loadTheme={nextTheme.name}
           onLoad={(res) => {
@@ -153,6 +172,7 @@ const App = () => {
             setNextTheme((prev) => ({ ...prev, loading: false }));
           }}
         />
+        <TypescriptInjection />
         <TopBar>
           <LocaleSelect
             value={locale}
@@ -168,6 +188,11 @@ const App = () => {
             disabled={nextTheme.loading}
             onChange={(name) => setNextTheme({ name, loading: true })}
           />
+          <Box display={'flex'} sx={{ ml: 'auto' }} gap={'4px'}>
+            <Button size={'medium'} onClick={() => setOpenDialog(true)}>
+              Theme Converter
+            </Button>
+          </Box>
         </TopBar>
         <MonacoCodeEditor
           ref={ref}
@@ -175,6 +200,12 @@ const App = () => {
           className={cssScrollBar}
           options={options}
         />
+        <FootBar>
+          <LanguageDisplay
+            value={activeLanguage?.languageId ?? 'plaintext'}
+            tmActive={activeLanguage?.isActive}
+          />
+        </FootBar>
       </MonacoProvider>
     </ThemeProvider>
   );
@@ -189,6 +220,7 @@ const ProgressBar = ({
   if (!mode) return null;
   return (
     <LinearProgress
+      key={isIndeterminate ? 'indeterminate' : 'determinate'}
       variant={isIndeterminate ? 'indeterminate' : 'determinate'}
       value={percent}
       sx={{ minWidth: 320 }}

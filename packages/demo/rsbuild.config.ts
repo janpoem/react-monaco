@@ -1,5 +1,4 @@
 import { defineConfig, rspack } from '@rsbuild/core';
-import { pluginNodePolyfill } from '@rsbuild/plugin-node-polyfill';
 import { pluginReact } from '@rsbuild/plugin-react';
 import pkg from './package.json';
 
@@ -13,9 +12,9 @@ export default defineConfig({
       ],
     },
   },
-  plugins: [pluginReact(), pluginNodePolyfill()],
+  plugins: [pluginReact()],
   html: {
-    title: '@react-monaco/core demo',
+    title: '@react-monaco/core demo base on rsbuild',
     template: './src/index.html',
   },
   output: {

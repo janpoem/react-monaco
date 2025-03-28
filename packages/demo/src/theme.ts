@@ -34,7 +34,6 @@ export const createTheme = (
       divider: borderColor,
       background: {
         default: background,
-        paper: background,
       },
     },
     spacing: 2,

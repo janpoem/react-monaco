@@ -18,10 +18,10 @@ export const LanguageDisplay = ({ value, tmActive }: LanguageDisplayProps) => {
       <Box
         sx={{
           color: palette.primary[palette.mode],
-          fontFamily: 'var(--rm-mono-font)',
+          fontFamily: 'var(--font-mono)',
           userSelect: 'none',
           textTransform: 'capitalize',
-          letterSpacing: '-0.065em',
+          letterSpacing: '-0.035em',
         }}
       >
         {value}
@@ -30,7 +30,6 @@ export const LanguageDisplay = ({ value, tmActive }: LanguageDisplayProps) => {
         <Tooltip title={<TextmateHelpInfo />} arrow>
           <Box
             sx={{
-              height: 20,
               userSelect: 'none',
               color: tmActive ? palette.text.primary : palette.text.disabled,
             }}
@@ -62,9 +61,12 @@ function TextmateHelpInfo() {
   return (
     <Info>
       Formatter base on{' '}
-      <Link href={'https://www.npmjs.com/package/onigasm'}>onigasm</Link> &{' '}
-      <Link href={'https://www.npmjs.com/package/monaco-textmate'}>
-        monaco-textmate
+      <Link href={'https://www.npmjs.com/package/vscode-oniguruma'}>
+        vscode-oniguruma
+      </Link>{' '}
+      &{' '}
+      <Link href={'https://www.npmjs.com/package/vscode-textmate'}>
+        vscode-textmate
       </Link>{' '}
       &{' '}
       <Link href={'https://www.npmjs.com/package/monaco-editor-textmate'}>

@@ -3,7 +3,9 @@
   --font-mono-inject: "JetBrains Mono";
   --font-sans: var(--font-sans-inject), "Noto Sans SC", "PingFang SC",
     "Microsoft YaHei UI", "Microsoft YaHei", "Segoe UI", sans-serif;
-  --font-mono: var(--font-mono-inject), "Roboto Mono", monospace;
+  --font-mono: var(--font-mono-inject), "Roboto Mono", "Noto Sans SC",
+    "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", "Segoe UI",
+    monospace;
 
   font-size: 14px;
   line-height: 1.5;
@@ -84,5 +86,5 @@ pre {
 }
 
 .monaco-editor {
-  font-family: var(--rm-font);
+  font-family: var(--font-sans);
 }

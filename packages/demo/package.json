@@ -1,6 +1,6 @@
 {
   "name": "@react-monaco/demo",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "",
   "license": "MIT",
   "type": "module",
@@ -27,15 +27,19 @@
     "@emotion/css": "^11.13.5",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
-    "@mui/material": "^6.4.7",
+    "@mui/material": "^7.0.0",
     "usehooks-ts": "^3.1.1",
-    "@zenstone/ts-utils": "^0.0.10"
+    "@zenstone/ts-utils": "^0.0.10",
+    "just-compare": "^2.3.0",
+    "@estruyf/vscode-theme-converter": "^1.1.0",
+    "change-case": "^5.4.4"
   },
   "devDependencies": {
     "@rsbuild/core": "^1.2.14",
     "@rsbuild/plugin-react": "^1.1.1",
     "@rsbuild/plugin-node-polyfill": "^1.3.0",
     "@types/react": "^19.0.10",
-    "@types/react-dom": "^19.0.4"
+    "@types/react-dom": "^19.0.4",
+    "@types/jsoneditor": "^9.9.5"
   }
 }

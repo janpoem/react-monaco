@@ -37,8 +37,6 @@ import {
 } from './toolbar';
 import type { NextTheme, SampleStorageData } from './types';
 
-const baseUrl = 'https://i.dont.know/monaco-editor/0.52.2/';
-
 const editorOptions: MonacoCodeEditorProps['options'] = {
   lineHeight: 1.5,
   tabSize: 2,

@@ -14,6 +14,8 @@ export const FootBar = ({ children }: FootBarProps) => {
         px: '0.5em',
         py: '4px',
         fontSize: '0.85em',
+        flex: '0 0 22px',
+        lineHeight: '22px',
       }}
       gap={'0.5em'}
     >
