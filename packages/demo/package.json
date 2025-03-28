@@ -28,7 +28,8 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@mui/material": "^6.4.7",
-    "usehooks-ts": "^3.1.1"
+    "usehooks-ts": "^3.1.1",
+    "@zenstone/ts-utils": "^0.0.10"
   },
   "devDependencies": {
     "@rsbuild/core": "^1.2.14",

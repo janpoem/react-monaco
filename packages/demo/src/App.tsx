@@ -21,7 +21,7 @@ import {
 import { createThemesPlugin } from '@react-monaco/plugin-themes';
 import { useMemo, useRef, useState } from 'react';
 import { useLocalStorage } from 'usehooks-ts';
-import { assetsOf } from './presets';
+import { assetsOf, monacoBaseUrl } from './presets';
 import { createTheme } from './theme';
 import {
   FileSelect,
@@ -31,8 +31,6 @@ import {
   TopBar,
 } from './toolbar';
 import type { NextTheme, SampleStorageData } from './types';
-
-const baseUrl = 'https://static.summererp.com/misc/monaco-editor/0.52.2/';
 
 const editorOptions: MonacoCodeEditorProps['options'] = {
   lineHeight: 1.5,
@@ -115,7 +113,7 @@ const App = () => {
     <ThemeProvider theme={muiTheme}>
       <CssBaseline />
       <MonacoProvider
-        loader={{ baseUrl, query: { locale } }}
+        loader={{ baseUrl: monacoBaseUrl, query: { locale } }}
         style={{
           '--rmBackdropBg': themeColors.background,
           '--rmBorderColor': themeColors.borderColor,

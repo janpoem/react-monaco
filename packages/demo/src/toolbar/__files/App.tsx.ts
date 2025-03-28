@@ -3,155 +3,219 @@ export default {
   filename: 'App.tsx',
   uri: 'App.tsx',
   source: `
-import './App.css';
-import { CssBaseline, ThemeProvider } from '@mui/material';
-import { unmountRemote } from '@zenstone/ts-utils/remote';
-import type { Position } from 'monaco-editor';
-import { useMemo, useRef, useState } from 'react';
+import { css } from '@emotion/css';
+import { CssBaseline, LinearProgress, ThemeProvider } from '@mui/material';
 import {
-  useIsomorphicLayoutEffect,
-  useLocalStorage,
-  useMediaQuery,
-} from 'usehooks-ts';
-import {
+  type DownloadingParams,
   MonacoCodeEditor,
+  type MonacoCodeEditorProps,
   type MonacoCodeEditorRef,
+  MonacoLoaderProcess,
+  type MonacoPresetProgressBarProps,
   MonacoProvider,
-  MonacoReadyState,
-} from './monaco';
-import { createMonacoProviderProps, monacoCodeEditorOptions } from './preset';
+  revertMonacoThemeSkeleton,
+} from '@react-monaco/core';
+import { LocaleInjection } from '@react-monaco/plugin-locale';
+import {
+  type TextmateCodeSet,
+  type TextmateFilterCodeSetCallback,
+  TextmateInjection,
+  type TextmateProviderCallback,
+  tmConfig,
+} from '@react-monaco/plugin-textmate';
+import { createThemesPlugin } from '@react-monaco/plugin-themes';
+import { useMemo, useRef, useState } from 'react';
+import { useLocalStorage } from 'usehooks-ts';
+import { assetsOf, monacoBaseUrl } from './presets';
 import { createTheme } from './theme';
-import { getCustomTheme, isDarkMonacoTheme, setupTheme } from './themes';
 import {
   FileSelect,
   FileSelectOptions,
-  FootBar,
-  LanguageDisplay,
   LocaleSelect,
   ThemeSelect,
   TopBar,
 } from './toolbar';
+import type { NextTheme, SampleStorageData } from './types';
+
+const baseUrl = 'https://i.dont.know/monaco-editor/0.52.2/';
+
+const editorOptions: MonacoCodeEditorProps['options'] = {
+  lineHeight: 1.5,
+  tabSize: 2,
+  fontSize: 16,
+  fontWeight: '300',
+  fontFamily: 'var(--font-mono)',
+  fontLigatures: 'no-common-ligatures, slashed-zero',
+  letterSpacing: 0.025,
+  minimap: { enabled: false },
+  theme: 'vs',
+  scrollbar: {
+    verticalHasArrows: false,
+    horizontalHasArrows: false,
+    vertical: 'visible',
+    horizontal: 'visible',
+    verticalScrollbarSize: 13,
+    horizontalScrollbarSize: 13,
+    verticalSliderSize: 8,
+    horizontalSliderSize: 8,
+  },
+};
+
+const cssScrollBar = css\`
+  .scrollbar .slider {
+    border-radius: 10px;
+  }
+  .scrollbar.vertical {
+    padding-top: 2px;
+    .slider {
+      margin-left: 1px;
+    }
+  }
+\`;
+
+const { themes, ThemesInjection } = createThemesPlugin({
+  themes: [
+    { key: 'atom-material-theme', name: 'Atom Material Theme' },
+    { key: 'atom-one-light', name: 'Atom One Light' },
+    { key: 'atomize', name: 'Atomize(Atom One Dark)' },
+    { key: 'csb-default', name: 'CSB Default' },
+    { key: 'github-light', name: 'GitHub Light' },
+    { key: 'webstorm-darcula', name: 'Webstorm Darcula' },
+    { key: 'webstorm-dark', name: 'Webstorm Dark' },
+  ],
+  // baseUrl: assetsOf('themes'),
+});
 
 const App = () => {
   const ref = useRef<MonacoCodeEditorRef | null>(null);
 
-  const mqDark = useMediaQuery('(prefers-color-scheme: dark)');
+  const [sampleData, storeSample] = useLocalStorage<SampleStorageData>(
+    'monaco-sample-data',
+    {},
+  );
+  const { locale, theme, filename } = sampleData;
 
-  const [monacoTheme, setMonacoTheme] = useLocalStorage<string | undefined>(
-    'MonacoTheme',
-    undefined,
+  const [nextTheme, setNextTheme] = useState<NextTheme>({ loading: false });
+
+  const input = useMemo(
+    () =>
+      FileSelectOptions.find((it) => it.filename === filename) ??
+      FileSelectOptions[0],
+    [filename],
   );
 
-  const [locale, setLocale] = useLocalStorage<string>('MonacoLocale', 'en');
-  const localeRef = useRef(locale);
-
-  const [assets, _setAssets] = useState(() => createMonacoProviderProps());
-  const [input, setInput] = useState(FileSelectOptions[0]);
-  const [language, setLanguage] = useState('');
-
-  const lastPositionRef = useRef<Position | null>(null);
-  const lastScrollRef = useRef<monaco.editor.INewScrollPosition | undefined>(
-    undefined,
-  );
-
-  useIsomorphicLayoutEffect(() => {
-    if (ref.current == null || ref.current.editorRef.current == null) return;
-    const { editorRef, modelRef, assetsIds, inputRef, setReadyState } =
-      ref.current;
-
-    if (localeRef.current !== locale) {
-      assetsIds.length && assetsIds.forEach(removeAsset);
-      // @ts-ignore
-      // biome-ignore lint/performance/noDelete: <explanation>
-      delete window.monaco;
-      //
-      inputRef.current.source = editorRef.current?.getValue() || '';
-      // editor state mark
-      markEditorLastState(editorRef.current);
-      modelRef.current?.dispose();
-      editorRef.current?.dispose();
-      setReadyState(MonacoReadyState.Init);
-      localeRef.current = locale;
-    }
-  }, [locale]);
-
-  const [monacoOptions, muiTheme, customTheme] = useMemo(() => {
-    let mTheme = monacoTheme;
-    let isDark = mqDark;
-    if (mTheme == null || !mTheme) {
-      mTheme = mqDark ? 'vs-dark' : 'vs-light';
-    } else {
-      isDark = isDarkMonacoTheme(mTheme);
-    }
-    const customTheme = getCustomTheme(mTheme);
-    if (customTheme != null) {
-      isDark = !!customTheme.isDark;
-    }
-    const _muiTheme = createTheme(isDark);
-
+  const [options, muiTheme, themeColors] = useMemo(() => {
+    const { name, colors, isDark } = revertMonacoThemeSkeleton(theme);
     return [
-      {
-        ...monacoCodeEditorOptions,
-        theme: mTheme,
-      },
-      _muiTheme,
-      customTheme,
+      { ...editorOptions, theme: name },
+      createTheme(isDark, colors),
+      colors,
     ];
-  }, [monacoTheme, mqDark]);
+  }, [theme]);
+
+  const update = (frag: Partial<SampleStorageData>) =>
+    storeSample((prev) => ({ ...prev, ...frag }));
 
   return (
     <ThemeProvider theme={muiTheme}>
       <CssBaseline />
       <MonacoProvider
-        {...assets}
-        onMounting={(_monaco) => {
-          setupTheme(_monaco, customTheme);
-          // console.log($monaco.editor.defineTheme('GithubDark', GithubDark()));
+        loader={{ baseUrl: monacoBaseUrl, query: { locale } }}
+        style={{
+          '--rmBackdropBg': themeColors.background,
+          '--rmBorderColor': themeColors.borderColor,
+          '--rmTextColor': themeColors.text,
         }}
-        locale={locale}
+        components={{ ProgressBar }}
       >
+        <TextmateInjection
+          debug={false}
+          // onChange={(active) => console.log(active)}
+          provider={customTmProvider}
+          filter={filterTmCodeSet}
+          baseUrl={assetsOf('tm')}
+        />
+        <LocaleInjection
+          locale={locale}
+          // baseUrl={assetsOf('locales')}
+        />
+        <ThemesInjection
+          debug
+          theme={options.theme}
+          loadTheme={nextTheme.name}
+          onLoad={(res) => {
+            if (res.isSuccess) {
+              const { name, isDark, colors } = res.theme;
+              update({ theme: { name, isDark, colors } });
+            }
+            setNextTheme((prev) => ({ ...prev, loading: false }));
+          }}
+        />
         <TopBar>
-          <LocaleSelect value={locale} onChange={setLocale} />
-          <FileSelect value={input} onChange={setInput} />
-          <ThemeSelect value={monacoTheme} onChange={setMonacoTheme} />
+          <LocaleSelect
+            value={locale}
+            onChange={(locale) => update({ locale })}
+          />
+          <FileSelect
+            value={input}
+            onChange={(it) => update({ filename: it.filename })}
+          />
+          <ThemeSelect
+            value={options.theme}
+            themes={themes}
+            disabled={nextTheme.loading}
+            onChange={(name) => setNextTheme({ name, loading: true })}
+          />
         </TopBar>
         <MonacoCodeEditor
           ref={ref}
           input={input}
-          options={monacoOptions}
-          onCreateModel={(model) => setLanguage(model.getLanguageId())}
-          onCreateEditor={(editor) => {
-            if (lastPositionRef.current != null) {
-              editor.focus();
-              editor.setPosition(lastPositionRef.current);
-              lastPositionRef.current = null;
-            }
-            if (lastScrollRef.current != null) {
-              editor.setScrollPosition(lastScrollRef.current);
-              lastScrollRef.current = undefined;
-            }
-          }}
+          className={cssScrollBar}
+          options={options}
         />
-        <FootBar>
-          <LanguageDisplay value={language} />
-        </FootBar>
       </MonacoProvider>
     </ThemeProvider>
   );
+};
 
-  function markEditorLastState(editor?: monaco.editor.IStandaloneCodeEditor) {
-    if (editor == null) return;
+const ProgressBar = ({
+  mode,
+  percent,
+  indeterminate,
+}: MonacoPresetProgressBarProps) => {
+  const isIndeterminate = percent == null || indeterminate;
+  if (!mode) return null;
+  return (
+    <LinearProgress
+      variant={isIndeterminate ? 'indeterminate' : 'determinate'}
+      value={percent}
+      sx={{ minWidth: 320 }}
+    />
+  );
+};
 
-    lastPositionRef.current = editor.getPosition();
-    lastScrollRef.current = {
-      scrollLeft: editor.getScrollLeft(),
-      scrollTop: editor.getScrollTop(),
+const customTmProvider: TextmateProviderCallback = ({ language, extname }) => {
+  if (extname === '.prisma') {
+    return {
+      url: new URL('prisma.tmLanguage.json', tmConfig('baseUrl')),
+      format: 'json',
+      languageId: 'prisma',
     };
   }
-
-  function removeAsset(id: string) {
-    unmountRemote(id);
+  if (language?.id === 'kotlin') {
+    return {
+      url: new URL('kotlin.tmLanguage.json', tmConfig('baseUrl')),
+      format: 'json',
+      languageId: language.id,
+      scopeName: 'source.gradle-kotlin-dsl',
+    };
   }
+};
+
+const filterTmCodeSet: TextmateFilterCodeSetCallback = (
+  code: TextmateCodeSet,
+) => {
+  return code;
 };
 
 export default App;

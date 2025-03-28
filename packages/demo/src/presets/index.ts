@@ -13,3 +13,6 @@ export const assetsOf = (path: string) => {
   if (_path) return `${assetsBaseUrl}${_path}/`; // make sure with the end /
   return assetsBaseUrl;
 };
+
+export const monacoBaseUrl =
+  'https://static.summererp.com/misc/monaco-editor/0.52.2/';
