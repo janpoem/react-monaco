@@ -5,6 +5,7 @@ import {
 } from '@react-monaco/core';
 import { isInferObj } from '@zenstone/ts-utils/object';
 import { notEmptyStr } from '@zenstone/ts-utils/string';
+import { localeConfig } from './config';
 import { MonacoLocales } from './locales';
 import type { LocaleInjectionProps } from './types';
 
@@ -25,6 +26,10 @@ export class LocaleEventsDelegator extends BaseEventsDelegator<MonacoEventsDefin
     this.register('prepareAssets').register('asset').register('mounting');
   }
 
+  get baseUrl() {
+    return this.props.baseUrl || localeConfig('baseUrl');
+  }
+
   prepareAssets = ({
     preloadAssets,
   }: MonacoEventsDefinition['prepareAssets']) => {
@@ -43,7 +48,7 @@ export class LocaleEventsDelegator extends BaseEventsDelegator<MonacoEventsDefin
     this.assetKey = `locale/${locale.key}`;
     preloadAssets.push({
       key: this.assetKey,
-      url: new URL(`${locale.key}.json`, this.props.baseUrl || location.origin),
+      url: new URL(`${locale.key}.json`, this.baseUrl),
       priority: -1000,
       type: 'json',
     });
@@ -59,7 +64,7 @@ export class LocaleEventsDelegator extends BaseEventsDelegator<MonacoEventsDefin
           this.injectLocale(this.locale, json);
         }
       } catch (err) {
-        console.error(`Locale ${this.locale} JSON parse error`, err);
+        console.error(`Locale: parse '${this.assetKey}' JSON error`, err);
       }
       handle();
     }

@@ -22,6 +22,18 @@ react monaco editor 多语言插件。
 - `zh-hans` - 简体中文
 - `zh-hant` - 繁體中文
 
+## 配置
+
+默认配置
+
+```ts
+import { makeConfigurable } from '@react-monaco/core';
+
+export const [setupLocale, localeConfig] = makeConfigurable({
+  baseUrl: 'https://cdn.jsdelivr.net/npm/@react-monaco/assets/assets/locales/',
+});
+```
+
 ## 加载机制
 
 目前已改为支持 json 格式的多语言数据文件，并且通过异步远程获取，非打包在源代码中。
