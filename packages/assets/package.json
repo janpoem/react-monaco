@@ -22,6 +22,6 @@
   "type": "module",
   "files": ["assets"],
   "scripts": {
-    "publish": "bun publish --access public"
+    "pub": "bun publish --access public"
   }
 }

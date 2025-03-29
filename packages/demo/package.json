@@ -8,7 +8,8 @@
   "scripts": {
     "dev": "rsbuild dev",
     "build": "rsbuild build",
-    "preview": "rsbuild preview"
+    "preview": "rsbuild preview",
+    "pub": "bun publish --access public"
   },
   "repository": {
     "type": "git",

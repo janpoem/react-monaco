@@ -4,9 +4,10 @@
   "type": "module",
   "scripts": {
     "exports-tm": "bun scripts/exports-vscode-tm.ts --watch",
+    "format-asset-json": "bun scripts/format-assets-json.ts",
     "build": "bun -F './packages/*' --build",
     "dev": "bun -F './packages/*' dev",
-    "format-asset-json": "bun scripts/format-assets-json.ts"
+    "pub": "bun -F './packages/*' pub"
   },
   "dependencies": {},
   "devDependencies": {

@@ -41,7 +41,8 @@
     "ts-check": "bunx --bun tsc --noEmit",
     "rollup": "bunx --bun rollup -c rollup.config.ts",
     "dev": "bun run rollup --watch",
-    "build": "bun run lint && bun run ts-check && bun run rollup"
+    "build": "bun run lint && bun run ts-check && bun run rollup",
+    "pub": "bun publish --access public"
   },
   "dependencies": {
     "react": "^19.0.0"
