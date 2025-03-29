@@ -1,6 +1,12 @@
 /// <reference types="monaco-editor/monaco.d.ts" />
+import type { PresetText, PresetTextCallback } from '@zenstone/preset-provider';
 import type { RemoteLoaderEventsDefinition } from '@zenstone/use-remote-loader';
 import type { CSSProperties, ReactNode } from 'react';
+
+export type _PresetText = PresetText;
+
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+export type _PresetTextCallback<Params = any> = PresetTextCallback<Params>;
 
 export type _MaybePromise<T> = T | Promise<T>;
 

@@ -2,7 +2,6 @@ import type { RemoteLoadState } from '@zenstone/use-remote-loader';
 import type { ComponentType, CSSProperties } from 'react';
 import type { MonacoLoaderProcess } from '../constants';
 import type { _CommonProps } from '../types';
-import type { MonacoPresetTexts } from './_texts';
 import ErrorDisplay from './ErrorDisplay';
 import Loader from './Loader';
 import ProgressBar from './ProgressBar';
@@ -54,7 +53,7 @@ export type MonacoPresetComponents = {
 };
 
 export type MonacoComponents = MonacoPresetComponents & {
-  [K in Exclude<string, keyof MonacoPresetTexts>]: ComponentType;
+  [K in Exclude<string, keyof MonacoPresetComponents>]: ComponentType;
 };
 
 export const initComponents = (): MonacoPresetComponents => ({

@@ -1,13 +1,11 @@
-import {
-  type PresetTextCallback,
-  usePresetProvider,
-} from '@zenstone/preset-provider';
+import { usePresetProvider } from '@zenstone/preset-provider';
 import { type ComponentProps, useMemo } from 'react';
 import type { MonacoComponents, MonacoTexts } from '../presets';
+import type { _PresetTextCallback } from '../types';
 
 export const useMonacoPreset = usePresetProvider<MonacoComponents, MonacoTexts>;
 
-type TextsParams<T> = T extends PresetTextCallback<infer P> ? P : unknown;
+type TextsParams<T> = T extends _PresetTextCallback<infer P> ? P : unknown;
 
 export const useMonacoText = <
   Key extends keyof MonacoTexts,

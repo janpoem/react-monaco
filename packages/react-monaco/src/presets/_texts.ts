@@ -1,5 +1,5 @@
-import type { PresetText, PresetTextCallback } from '@zenstone/preset-provider';
 import { MonacoLoaderProcess } from '../constants';
+import type { _PresetText, _PresetTextCallback } from '../types';
 
 /**
  * 错误 Keys
@@ -21,17 +21,17 @@ export type DownloadingParams = {
 /**
  * 预设文本
  */
-export type MonacoPresetTexts = Record<MonacoPresetErrorsKeys, PresetText> & {
-  [MonacoLoaderProcess.Initializing]: PresetText;
-  [MonacoLoaderProcess.Loading]: PresetTextCallback<DownloadingParams>;
-  [MonacoLoaderProcess.Preparing]: PresetText;
-  [MonacoLoaderProcess.Completed]: PresetText; // will not use
+export type MonacoPresetTexts = Record<MonacoPresetErrorsKeys, _PresetText> & {
+  [MonacoLoaderProcess.Initializing]: _PresetText;
+  [MonacoLoaderProcess.Loading]: _PresetTextCallback<DownloadingParams>;
+  [MonacoLoaderProcess.Preparing]: _PresetText;
+  [MonacoLoaderProcess.Completed]: _PresetText; // will not use
 };
 
 export type MonacoTexts = MonacoPresetTexts & {
   [K in Exclude<string, keyof MonacoPresetTexts>]:
-    | PresetText
-    | PresetTextCallback;
+    | _PresetText
+    | _PresetTextCallback;
 };
 
 export const initTexts = (): MonacoPresetTexts => ({
