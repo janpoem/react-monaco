@@ -1,6 +1,6 @@
 {
   "name": "@react-monaco/assets",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "React monaco editor related assets.",
   "author": "Jiankai Zeng <janpoem@163.com>",
   "license": "MIT",
