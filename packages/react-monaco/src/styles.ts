@@ -90,6 +90,7 @@ export const cssErrScope = css`
 export const cssErrMessage = css`
   font-size: 0.95em;
   word-wrap: break-word;
+  min-width: 0px;
 `;
 
 /******************************************************************************

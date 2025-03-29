@@ -15,9 +15,12 @@ import { type MonacoContextType, useMonaco } from './MonacoProvider';
 import { cssVerticalContainer, presetCls } from './styles';
 import type {
   MonacoCodeInput,
+  MonacoEditorFocusAndBlurParams,
   MonacoEditorMountParams,
+  MonacoEditorPrepareParams,
   MonacoModelChangeParams,
   MonacoModelCreateParams,
+  MonacoModelPrepareParams,
 } from './types';
 import { extractExtname, isFileInput } from './utils';
 
@@ -35,11 +38,13 @@ export type MonacoCodeEditorProps = {
   >;
   className?: string;
   style?: CSSProperties;
+  beforeModel?: (params: MonacoModelPrepareParams) => void;
   onModel?: (params: MonacoModelCreateParams) => void;
   onChange?: (params: MonacoModelChangeParams) => void;
+  beforeMount?: (params: MonacoEditorPrepareParams) => void;
   onMount?: (params: MonacoEditorMountParams) => void;
-  onFocus?: (params: MonacoEditorMountParams) => void;
-  onBlur?: (params: MonacoEditorMountParams) => void;
+  onFocus?: (params: MonacoEditorFocusAndBlurParams) => void;
+  onBlur?: (params: MonacoEditorFocusAndBlurParams) => void;
 };
 
 export const MonacoCodeEditor = forwardRef(
@@ -49,8 +54,10 @@ export const MonacoCodeEditor = forwardRef(
       options,
       className,
       style,
+      beforeModel,
       onModel,
       onChange,
+      beforeMount,
       onMount,
       onFocus,
       onBlur,
@@ -65,8 +72,10 @@ export const MonacoCodeEditor = forwardRef(
     );
     const isFocusRef = useRef<boolean>(false);
 
+    const beforeModelFn = useEventCallback(beforeModel);
     const onModelFn = useEventCallback(onModel);
     const onChangeFn = useEventCallback(onChange);
+    const beforeMountFn = useEventCallback(beforeMount);
     const onMountFn = useEventCallback(onMount);
     const onFocusFn = useEventCallback(onFocus);
     const onBlurFn = useEventCallback(onBlur);
@@ -175,6 +184,7 @@ export const MonacoCodeEditor = forwardRef(
         editor: editorRef.current,
       };
 
+      beforeModelFn?.(params);
       emitterRef.current?.emit('prepareModel', params);
       const model = _monaco.editor.createModel(source || '', languageId, uri);
       model.onDidChangeContent((event) => {
@@ -192,10 +202,22 @@ export const MonacoCodeEditor = forwardRef(
         throw new Error(getText('ERR_NO_CONTAINER'));
       }
 
-      const { source, scroll, position } = imaging({
+      const image = imaging({
         editor: editorRef.current,
         model: modelRef.current,
       });
+
+      const { source, scroll, position } = image;
+      const beforeParams = {
+        mode: 'code',
+        monaco: _monaco,
+        editor: editorRef.current,
+        model: modelRef.current,
+        image,
+      };
+
+      beforeMount?.(beforeParams);
+      emitterRef.current?.emit('prepareEditor', beforeParams);
 
       modelRef.current = createModel(
         source
@@ -222,18 +244,21 @@ export const MonacoCodeEditor = forwardRef(
         ...options,
       });
 
-      if (scroll) editor.setScrollPosition(scroll);
-      if (position) {
-        editor.focus();
-        editor.setPosition(position);
-      }
-
       const params = {
         mode: 'code',
         monaco: _monaco,
         editor,
         model: modelRef.current,
       };
+
+      onMountFn?.({ ...params, image });
+      emitterRef.current?.emit('editor', { ...params, image });
+
+      if (scroll) editor.setScrollPosition(scroll);
+      if (position) {
+        editor.focus();
+        editor.setPosition(position);
+      }
 
       editor.onDidFocusEditorText(() => {
         isFocusRef.current = true;
@@ -245,9 +270,6 @@ export const MonacoCodeEditor = forwardRef(
       });
 
       editorRef.current = editor;
-
-      onMountFn?.(params);
-      emitterRef.current?.emit('editor', params);
     }
   },
 );

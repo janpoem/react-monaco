@@ -1,4 +1,4 @@
-import { isInferObj, notEmptyStr } from '@zenstone/ts-utils';
+import { isInferObj, isNumber, notEmptyStr } from '@zenstone/ts-utils';
 import type {
   EventEmitter,
   EventsCallbacks,
@@ -13,36 +13,79 @@ type KeysMatching<T, V> = {
 
 // biome-ignore format: no format here
 const ignoreMethods: string[] = [
-  'registerEvent', 'inject', 'eject', 'toString', 'setOptions'
+  'registerEvent', 'inject', 'eject', 'toString', 'setOptions', 'debug'
 ] as const;
 // biome-ignore format: no format here
 type IgnoreMethods =
-  'registerEvent'| 'inject'| 'eject'| 'toString'| 'setOptions'
+  'registerEvent'| 'inject'| 'eject'| 'toString'| 'setOptions'| 'debug'
 // 这个写法，理论上没错，但不知道为什么，实际就不生效，很神奇
 // type IgnoreMethods = (typeof ignoreMethods)[number];
 
-export type BaseEventsDelegatorOptions = {
-  debug: boolean;
+export enum EventsDebug {
+  base = 0b00_10,
+}
+
+export type EventsDelegatorOptions = {
+  debug: boolean | EventsDebug | number;
   [key: string]: unknown;
 };
 
 export abstract class BaseEventsDelegator<
-  E extends EventsDefinition = EventsDefinition,
-> implements EventsDelegator<E>
+  Events extends EventsDefinition = EventsDefinition,
+  Options extends EventsDelegatorOptions = EventsDelegatorOptions,
+> implements EventsDelegator<Events>
 {
-  options: BaseEventsDelegatorOptions = {
+  protected scopeName?: string | string[];
+
+  options: EventsDelegatorOptions = {
     debug: false,
   };
 
-  #events: EventsCallbacks<E> = {};
+  #events: EventsCallbacks<Events> = {};
 
   #ejection?: () => void;
 
-  get isDebug() {
-    return this.options.debug;
+  constructor(options?: Partial<Options>) {
+    if (options != null) {
+      this.setOptions(options);
+    }
   }
 
-  setOptions = (options: Partial<BaseEventsDelegatorOptions>) => {
+  get isDebug() {
+    return !!this.options.debug;
+  }
+
+  get isDebugBase() {
+    return (
+      isNumber(this.options.debug) &&
+      (this.options.debug & EventsDebug.base) === EventsDebug.base
+    );
+  }
+
+  debug(...args: unknown[]) {
+    if (!this.isDebug) return this;
+    let name: string | undefined;
+    let style: string | undefined;
+    if (notEmptyStr(this.scopeName)) {
+      name = this.scopeName;
+    } else if (Array.isArray(this.scopeName)) {
+      [name, style] = this.scopeName;
+    }
+    if (name) {
+      console.log(
+        `%c[%c${name}%c]`,
+        'color: gray',
+        style || 'color: cyan',
+        'color: gray',
+        ...args,
+      );
+    } else {
+      console.log(...args);
+    }
+    return this;
+  }
+
+  setOptions = (options: Partial<Options>) => {
     Object.assign(this.options, options);
     return this;
   };
@@ -55,13 +98,13 @@ export abstract class BaseEventsDelegator<
       | {
           [K in
             | Exclude<KeysMatching<this, () => unknown>, IgnoreMethods>
-            | string]?: keyof E;
+            | string]?: keyof Events;
         },
-    event?: keyof E,
+    event?: keyof Events,
   ): this {
     if (isInferObj(methodName)) {
       for (const [m, e] of Object.entries(methodName)) {
-        this.register(m, e as keyof E);
+        this.register(m, e as keyof Events);
       }
       return this;
     }
@@ -80,7 +123,7 @@ export abstract class BaseEventsDelegator<
     return this;
   }
 
-  inject = (emitter?: EventEmitter<E>) => {
+  inject = (emitter?: EventEmitter<Events>) => {
     if (!emitter) {
       if (this.isDebug) {
         console.warn(
@@ -89,12 +132,18 @@ export abstract class BaseEventsDelegator<
       }
       return;
     }
+    if (this.isDebugBase) {
+      this.debug('inject events', this.#events);
+    }
     linkEvents(emitter, this.#events, 'on');
     this.#ejection = () => linkEvents(emitter, this.#events, 'off');
   };
 
-  eject = (emitter?: EventEmitter<E>) => {
+  eject = (emitter?: EventEmitter<Events>) => {
     if (this.#ejection != null) {
+      if (this.isDebugBase) {
+        this.debug('eject events by ejection');
+      }
       this.#ejection();
       this.#ejection = undefined;
       return;
@@ -106,6 +155,9 @@ export abstract class BaseEventsDelegator<
         );
       }
       return;
+    }
+    if (this.isDebugBase) {
+      this.debug('eject events', this.#events);
     }
     linkEvents(emitter, this.#events, 'off');
   };

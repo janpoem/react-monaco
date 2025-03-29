@@ -48,13 +48,11 @@ const ErrorDisplay = ({
         style={style}
       >
         {scope && (
-          <span className={`${presetCls.errScope} ${cssErrScope}`}>
-            {scope}
-          </span>
+          <div className={`${presetCls.errScope} ${cssErrScope}`}>{scope}</div>
         )}
-        <span className={`${presetCls.errMsg} ${cssErrMessage}`}>
+        <div className={`${presetCls.errMsg} ${cssErrMessage}`}>
           {errMsg(error) || defaultText}
-        </span>
+        </div>
       </div>
     </Ele>
   );

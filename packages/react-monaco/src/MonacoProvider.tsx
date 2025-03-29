@@ -200,17 +200,25 @@ export const MonacoProvider = ({
   }
 
   function initMonacoEnvironment({
-    resultSet,
+    props: { assets, baseUrl },
+    resultSet: { blobUrls },
     preloadAssets,
   }: RemoteOnMountAssetsParams) {
     type Worker = { url: string; labels: string[] };
     let editor: Worker | undefined;
     const workers: Worker[] = [];
-    for (const it of preloadAssets) {
+    for (const it of assets) {
       if (!isWorkerAsset(it)) continue;
-      const { labels } = it;
-      const url = resultSet.blobUrls[it.key] ?? it.url.toString();
-      if (isWorkerKey(it.key, 'editor')) {
+      const { key, labels } = it;
+      const preloadAsset = preloadAssets.find((asset) => asset.key === it.key);
+      const url = (
+        preloadAsset
+          ? preloadAsset.blobUrl
+            ? (blobUrls[key] ?? preloadAsset.url)
+            : preloadAsset.url
+          : new URL(it.url, baseUrl)
+      ).toString();
+      if (isWorkerKey(key, 'editor')) {
         editor = { url, labels };
       } else {
         workers.push({ url, labels });

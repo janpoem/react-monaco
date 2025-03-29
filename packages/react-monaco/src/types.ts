@@ -2,6 +2,7 @@
 import type { PresetText, PresetTextCallback } from '@zenstone/preset-provider';
 import type { RemoteLoaderEventsDefinition } from '@zenstone/use-remote-loader';
 import type { CSSProperties, ReactNode } from 'react';
+import type { MonacoTransientStateImage } from './hooks';
 
 export type _PresetText = PresetText;
 
@@ -126,7 +127,23 @@ export type MonacoModelChangeParams = MonacoModelCreateParams & {
   event: monaco.editor.IModelContentChangedEvent;
 };
 
+export type MonacoEditorPrepareParams = {
+  mode: 'code' | string;
+  monaco: typeof monaco;
+  editor?: monaco.editor.IStandaloneCodeEditor;
+  model?: monaco.editor.ITextModel;
+  image: MonacoTransientStateImage;
+};
+
 export type MonacoEditorMountParams = {
+  mode: 'code' | string;
+  monaco: typeof monaco;
+  editor: monaco.editor.IStandaloneCodeEditor;
+  model?: monaco.editor.ITextModel;
+  image: MonacoTransientStateImage;
+};
+
+export type MonacoEditorFocusAndBlurParams = {
   mode: 'code' | string;
   monaco: typeof monaco;
   editor: monaco.editor.IStandaloneCodeEditor;
@@ -138,6 +155,7 @@ export type MonacoEventsDefinition = RemoteLoaderEventsDefinition & {
   prepareModel: MonacoModelPrepareParams;
   createModel: MonacoModelCreateParams;
   changeModel: MonacoModelChangeParams;
+  prepareEditor: MonacoEditorPrepareParams;
   /**
    * Editor 挂载成功事件
    */

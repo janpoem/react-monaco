@@ -8,6 +8,7 @@ import useRemoteLoader, {
 } from '@zenstone/use-remote-loader';
 import { type ReactNode, useCallback, useMemo, useRef } from 'react';
 import { LoaderWrapper } from './components';
+import { monacoBaseUrl } from './config';
 import { MonacoLoaderProcess, MonacoWorkerLabels } from './constants';
 import type { MonacoPresetLoaderSharedProps } from './presets';
 import type { EventEmitter, MonacoEventsDefinition } from './types';
@@ -45,10 +46,12 @@ export const MonacoLoader = <Query = object>({
   ...props
 }: MonacoLoaderProps<Query>) => {
   const baseUrl = useMemo(() => {
+    const defaultUrl = monacoBaseUrl();
+    if (!iBaseUrl) return defaultUrl;
     try {
       return new URL(iBaseUrl || '', location.origin);
     } catch (e) {
-      return new URL(location.origin);
+      return defaultUrl;
     }
   }, [iBaseUrl]);
   const assets = useMemo(() => mergeAssets(iAssets), [iAssets]);
