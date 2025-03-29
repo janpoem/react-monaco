@@ -1,5 +1,5 @@
 import { useMonaco } from '@react-monaco/core';
-import { useEffect, useRef } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import { TextmateEventsDelegator } from './TextmateEventsDelegator';
 import type { TextmateInjectionProps } from './types';
 
@@ -8,10 +8,9 @@ export const TextmateInjection = (props: TextmateInjectionProps) => {
   const delegatorRef = useRef<TextmateEventsDelegator>(null);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-  useEffect(() => {
+  useLayoutEffect(() => {
     try {
-      delegatorRef.current = new TextmateEventsDelegator(props);
-      delegatorRef.current.setOptions({
+      delegatorRef.current = new TextmateEventsDelegator(props, {
         mounting: extendThemes,
         debug: props.debug,
       });

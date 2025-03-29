@@ -1,5 +1,6 @@
 import {
   BaseEventsDelegator,
+  type EventsDelegatorOptions,
   type MonacoEventsDefinition,
   updateMonacoEnvironment,
 } from '@react-monaco/core';
@@ -15,14 +16,20 @@ declare global {
 }
 
 export class LocaleEventsDelegator extends BaseEventsDelegator<MonacoEventsDefinition> {
+  scopeName = 'Locale';
+
   locale?: string;
 
   assetKey = '';
 
-  constructor(public readonly props: LocaleInjectionProps) {
-    super();
+  constructor(
+    public readonly props: LocaleInjectionProps,
+    opts?: Partial<EventsDelegatorOptions>,
+  ) {
+    super(opts);
     this.locale = props.locale;
-    this.register('prepareAssets').register('asset').register('mounting');
+    this.register('prepareAssets').register('asset');
+    this.debug(`constructor with locale '${this.locale}'`);
   }
 
   get baseUrl() {
@@ -34,13 +41,13 @@ export class LocaleEventsDelegator extends BaseEventsDelegator<MonacoEventsDefin
   }: MonacoEventsDefinition['prepareAssets']) => {
     const locale = MonacoLocales.find((it) => it.key === this.locale);
     if (locale == null) {
-      this.isDebug && console.log(`Locale: unknown locale '${this.locale}'`);
+      this.debug(`unknown locale '${this.locale}'`);
       return;
     }
 
     if (window.MonacoLocales?.[locale.key] != null) {
       updateMonacoEnvironment({ locale: locale.key });
-      this.isDebug && console.log(`Locale: '${this.locale}' is loaded`);
+      this.debug(`'${this.locale}' is loaded`);
       return;
     }
 
@@ -51,8 +58,7 @@ export class LocaleEventsDelegator extends BaseEventsDelegator<MonacoEventsDefin
       priority: -1000,
       type: 'json',
     });
-    this.isDebug &&
-      console.log(`Locale: add asset '${this.assetKey}' to preload`);
+    this.debug(`add asset '${this.assetKey}'`);
   };
 
   asset = ({ key, handle, task }: MonacoEventsDefinition['asset']) => {
@@ -73,12 +79,12 @@ export class LocaleEventsDelegator extends BaseEventsDelegator<MonacoEventsDefin
     if (window.MonacoLocales == null) window.MonacoLocales = {};
     window.MonacoLocales[locale] = data;
     updateMonacoEnvironment({ locale });
-    this.isDebug &&
-      console.log(`Locale: inject locale '${locale}' into MonacoEnvironment`);
+    this.debug(`inject locale '${locale}' into MonacoEnvironment`);
   };
 
   switchLocale = async (locale?: string) => {
     if (typeof monaco === 'undefined') return;
+    this.debug(`switch locale to '${locale}'`);
     this.locale = locale;
     // biome-ignore lint/performance/noDelete: <explanation>
     delete window.MonacoEnvironment;

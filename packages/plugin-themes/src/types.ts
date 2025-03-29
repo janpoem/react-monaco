@@ -1,5 +1,8 @@
 /// <reference types="monaco-editor/monaco.d.ts" />
-import type { MonacoCustomTheme } from '@react-monaco/core';
+import type {
+  EventsDelegatorOptions,
+  MonacoCustomTheme,
+} from '@react-monaco/core';
 import type { ComponentType } from 'react';
 
 export type MonacoThemeDeclaration = {
@@ -32,7 +35,7 @@ export type ThemeOnLoadFailure = {
 
 export type ThemeInjectionProps = {
   theme?: string;
-  debug?: boolean;
+  debug?: EventsDelegatorOptions['debug'];
   onLoad?: (result: ThemeOnLoadSuccess | ThemeOnLoadFailure) => void;
   loadTheme?: string;
 };

@@ -1,5 +1,6 @@
 import {
   BaseEventsDelegator,
+  type EventsDelegatorOptions,
   type MonacoEventsDefinition,
 } from '@react-monaco/core';
 import {
@@ -23,6 +24,8 @@ import type {
 } from './types';
 
 export class TextmateEventsDelegator extends BaseEventsDelegator<MonacoEventsDefinition> {
+  scopeName = ['Textmate', 'color: orange'];
+
   wasmKey = 'wasm/onigasm';
 
   wireGrammars: Record<string, boolean> = {};
@@ -35,8 +38,11 @@ export class TextmateEventsDelegator extends BaseEventsDelegator<MonacoEventsDef
 
   vsOnigurumaLib?: Promise<IOnigLib>;
 
-  constructor(public readonly props: TextmateInjectionProps) {
-    super();
+  constructor(
+    public readonly props: TextmateInjectionProps,
+    opts?: Partial<EventsDelegatorOptions>,
+  ) {
+    super(opts);
     this.register('prepareAssets')
       .register('onAssetVSCodeWasm', `asset:${this.wasmKey}`)
       .register('mounting')
@@ -66,6 +72,7 @@ export class TextmateEventsDelegator extends BaseEventsDelegator<MonacoEventsDef
     preloadAssets,
   }: MonacoEventsDefinition['prepareAssets']) => {
     preloadAssets.push(this.wasmAsset);
+    this.debug(`add asset '${this.wasmKey}'`);
   };
 
   onAssetVSCodeWasm = async ({
@@ -79,15 +86,16 @@ export class TextmateEventsDelegator extends BaseEventsDelegator<MonacoEventsDef
           createOnigScanner: (patterns) => new OnigScanner(patterns),
           createOnigString: (s) => new OnigString(s),
         });
-        this.isDebug && console.log('vscode-oniguruma wasm loaded');
+        this.debug('vscode-oniguruma wasm loaded');
       } catch (err) {
-        console.error('load vscode-oniguruma wasm error', err);
+        this.debug('load vscode-oniguruma wasm error', err);
       }
     }
     if (this.vsOnigurumaLib == null) {
-      console.error('vscode-oniguruma lib instance is null');
+      this.debug('vscode-oniguruma lib instance is null');
     } else {
       this.vsRegistry = this.newVsCodeRegistry(this.vsOnigurumaLib);
+      this.debug('create grammar registry');
     }
     handle();
   };
@@ -121,6 +129,7 @@ export class TextmateEventsDelegator extends BaseEventsDelegator<MonacoEventsDef
     }
 
     this.code = this.createCodeSet(languageId, params, provider);
+    this.debug('create code set', this.code);
   };
 
   // 基于 prepareModel 派生，用于优先创建对应的 Code
@@ -226,18 +235,14 @@ export class TextmateEventsDelegator extends BaseEventsDelegator<MonacoEventsDef
     if (isWired) return;
 
     if (isTmSupportLanguage(tmName) || this.providers[languageId]) {
-      this.isDebug &&
-        console.log(`wireGrammars: ${languageId}/${scopeName}/${tmName} start`);
+      this.debug('wire grammar', { languageId, scopeName, tmName });
       if (!this.wireGrammars[tmName]) {
         this.wireGrammars[tmName] = true;
         const grammars = new Map();
         grammars.set(languageId, scopeName);
         // @ts-ignore typeof monacoNsps
         wireTmGrammars(_monaco, this.vsRegistry, grammars, editor).then(() => {
-          this.isDebug &&
-            console.log(
-              `wireGrammars: ${languageId}/${scopeName}/${tmName} done`,
-            );
+          this.debug('wire grammar done');
         });
       }
     }
@@ -256,16 +261,10 @@ export class TextmateEventsDelegator extends BaseEventsDelegator<MonacoEventsDef
           if (this.code.provider != null) {
             url = new URL(this.code.provider.url, baseUrl);
           }
-          this.isDebug &&
-            console.log(
-              `loadGrammar: load ${this.code.languageId}:${scopeName} grammar from "${url}"`,
-            );
+          this.debug(`load '${scopeName}' grammar from ${url}`);
           const resp = await fetch(url, { cache: 'force-cache' });
           const text = await resp.text();
-          this.isDebug &&
-            console.log(
-              `loadGrammar: load ${this.code.languageId}:${scopeName} grammar success, content size: ${text.length}`,
-            );
+          this.debug(`load '${scopeName}' grammar success, size:`, text.length);
           // vscode-textmate 新版本，基于文件名来判断是  json 合适 plist
           return parseRawGrammar(text, url.toString());
         } catch (err) {

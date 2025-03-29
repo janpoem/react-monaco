@@ -1,5 +1,6 @@
 import {
   BaseEventsDelegator,
+  type EventsDelegatorOptions,
   isMonacoBuiltinTheme,
   isMonacoCustomTheme,
   type MonacoCustomTheme,
@@ -15,6 +16,8 @@ import type {
 } from './types';
 
 export class ThemesEventsDelegator extends BaseEventsDelegator<MonacoEventsDefinition> {
+  scopeName = ['Themes', 'color: lightgreen'];
+
   assetKey?: string;
 
   themeName?: string;
@@ -28,10 +31,12 @@ export class ThemesEventsDelegator extends BaseEventsDelegator<MonacoEventsDefin
   constructor(
     public readonly settings: CreateThemesPluginOptions,
     public readonly props: ThemeInjectionProps,
+    opts?: Partial<EventsDelegatorOptions>,
   ) {
-    super();
+    super(opts);
     this.setTheme(props.theme);
     this.register('prepareAssets').register('asset').register('mounting');
+    this.debug(`constructor with theme '${props.theme}'`);
   }
 
   get baseUrl() {
@@ -44,6 +49,9 @@ export class ThemesEventsDelegator extends BaseEventsDelegator<MonacoEventsDefin
   }
 
   pickTheme = (name?: string) => {
+    if (name && isMonacoBuiltinTheme(name)) {
+      throw new Error(`'${name}' is a monaco builtin theme`);
+    }
     const theme = this.settings.themes.find((it) => it.key === name);
     if (theme == null) {
       throw new Error(`unknown theme '${this.themeName}'`);
@@ -62,7 +70,7 @@ export class ThemesEventsDelegator extends BaseEventsDelegator<MonacoEventsDefin
       const loadedTheme = theme.theme ?? this.loadedThemes[theme.key];
 
       if (loadedTheme != null) {
-        this.isDebug && console.log(`Locale: '${theme.key}' is loaded`);
+        this.debug(`theme '${theme.key}' is loaded`);
         this.defineTheme(loadedTheme);
         this.props.onLoad?.({
           isSuccess: true,
@@ -78,10 +86,9 @@ export class ThemesEventsDelegator extends BaseEventsDelegator<MonacoEventsDefin
         priority: -500,
         type: 'json',
       });
-      this.isDebug &&
-        console.log(`Themes: add asset '${this.assetKey}' to preload`);
+      this.debug(`add asset '${this.assetKey}'`);
     } catch (err) {
-      this.isDebug && console.log(`Themes: ${errMsg(err)}`);
+      this.debug(errMsg(err));
     }
   };
 
@@ -95,7 +102,7 @@ export class ThemesEventsDelegator extends BaseEventsDelegator<MonacoEventsDefin
         this.loadedThemes[this.themeName] = theme;
         this.props.onLoad?.({ isSuccess: true, theme });
       } catch (err) {
-        console.error(`Themes: parse '${this.assetKey}' JSON error`, err);
+        this.debug(`parse '${this.assetKey}' JSON error`, err);
         this.props.onLoad?.({ isSuccess: false });
       }
       handle();
@@ -118,8 +125,7 @@ export class ThemesEventsDelegator extends BaseEventsDelegator<MonacoEventsDefin
       }
 
       if (name && isMonacoBuiltinTheme(name)) {
-        this.isDebug &&
-          console.log(`Themes: '${name}' is monaco builtin theme`);
+        this.debug(`'${name}' is monaco builtin theme`);
         this.props.onLoad?.({
           isSuccess: true,
           theme: MonacoPresetThemes[name],
@@ -132,7 +138,7 @@ export class ThemesEventsDelegator extends BaseEventsDelegator<MonacoEventsDefin
       const loadedTheme = themeDec.theme ?? this.loadedThemes[themeDec.key];
 
       if (loadedTheme != null) {
-        this.isDebug && console.log(`Themes: '${name}' is loaded`);
+        this.debug(`'${name}' is loaded`);
         this.defineTheme(loadedTheme);
         this.props.onLoad?.({
           isSuccess: true,
@@ -157,7 +163,7 @@ export class ThemesEventsDelegator extends BaseEventsDelegator<MonacoEventsDefin
       this.defineTheme(theme);
       this.props.onLoad?.({ isSuccess: true, theme, isPreload: true });
     } catch (err) {
-      this.isDebug && console.log(`Themes: ${errMsg(err)}`);
+      this.debug('preload theme error:', errMsg(err));
       this.props.onLoad?.({ isSuccess: false, isPreload: true });
     } finally {
       this.loading = undefined;
@@ -167,12 +173,13 @@ export class ThemesEventsDelegator extends BaseEventsDelegator<MonacoEventsDefin
   defineTheme = (theme?: MonacoCustomTheme) => {
     if (theme == null) return this;
     if (typeof monaco === 'undefined') {
-      console.log('Themes: Global monaco undefined');
+      this.debug('Global monaco undefined');
       return this;
     }
     if (!this.definedThemes[theme.name]) {
       this.definedThemes[theme.name] = true;
       monaco.editor.defineTheme(theme.name, theme.data);
+      this.debug(`define theme '${theme.name}' to monaco`);
     }
     return this;
   };

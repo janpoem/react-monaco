@@ -1,5 +1,5 @@
 import { useMonaco } from '@react-monaco/core';
-import { useEffect, useRef } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import { ThemesEventsDelegator } from './ThemesEventsDelegator';
 import type {
   CreateThemesPluginOptions,
@@ -8,9 +8,9 @@ import type {
 } from './types';
 
 export const createThemesPlugin = (
-  options: CreateThemesPluginOptions,
+  settings: CreateThemesPluginOptions,
 ): ThemesPlugin => {
-  const { themes } = options;
+  const { themes } = settings;
   if (!themes.length) {
     throw new Error(
       'Creating a theme plugin requires at least a theme declaration',
@@ -21,27 +21,27 @@ export const createThemesPlugin = (
     const { loadTheme } = props;
     const loadThemeRef = useRef(loadTheme);
 
-    const { emitterRef, setError } = useMonaco();
+    const { emitterRef, setError, lifecycleId } = useMonaco();
     const delegatorRef = useRef<ThemesEventsDelegator>(null);
 
     // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-    useEffect(() => {
+    useLayoutEffect(() => {
       try {
-        delegatorRef.current = new ThemesEventsDelegator(options, props);
-        delegatorRef.current.setOptions({
+        delegatorRef.current = new ThemesEventsDelegator(settings, props, {
           debug: props.debug,
         });
         delegatorRef.current.inject(emitterRef.current);
       } catch (err) {
         setError(err);
       }
+
       return () => {
         delegatorRef.current?.eject(emitterRef.current);
         delegatorRef.current = null;
       };
-    }, []);
+    }, [lifecycleId]);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
       if (delegatorRef.current == null) return;
       if (loadThemeRef.current !== loadTheme) {
         loadThemeRef.current = loadTheme;
