@@ -4,7 +4,7 @@ import {
   type MonacoEventsDefinition,
   useMonaco,
 } from '@react-monaco/core';
-import { useEffect, useRef } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 
 export type TypescriptInjectionProps = {
   dtsBaseUrl?: string | URL;
@@ -35,7 +35,7 @@ export const TypescriptInjection = (props: TypescriptInjectionProps) => {
   const delegatorRef = useRef<TypescriptEventsDelegator>(null);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-  useEffect(() => {
+  useLayoutEffect(() => {
     try {
       delegatorRef.current = new TypescriptEventsDelegator(props);
       delegatorRef.current.setOptions({

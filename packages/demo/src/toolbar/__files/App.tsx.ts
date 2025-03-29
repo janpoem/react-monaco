@@ -4,13 +4,18 @@ export default {
   uri: 'App.tsx',
   source: `
 import { css } from '@emotion/css';
-import { CssBaseline, LinearProgress, ThemeProvider } from '@mui/material';
+import Settings from '@mui/icons-material/Settings';
 import {
-  type DownloadingParams,
+  Box,
+  Button,
+  CssBaseline,
+  LinearProgress,
+  ThemeProvider,
+} from '@mui/material';
+import {
   MonacoCodeEditor,
   type MonacoCodeEditorProps,
   type MonacoCodeEditorRef,
-  MonacoLoaderProcess,
   type MonacoPresetProgressBarProps,
   MonacoProvider,
   revertMonacoThemeSkeleton,
@@ -26,27 +31,34 @@ import {
 import { createThemesPlugin } from '@react-monaco/plugin-themes';
 import { useMemo, useRef, useState } from 'react';
 import { useLocalStorage } from 'usehooks-ts';
-import { assetsOf, monacoBaseUrl } from './presets';
+import type { TextmateActiveLanguage } from '../../../src/plugins/textmate';
+import ThemeConverter from './experimental/theme-converter';
+import { TypescriptInjection } from './experimental/typescript';
+import { assetsOf } from './presets';
 import { createTheme } from './theme';
+import githubLight from './thtmes/github-light';
 import {
   FileSelect,
   FileSelectOptions,
+  FootBar,
+  LanguageDisplay,
   LocaleSelect,
   ThemeSelect,
   TopBar,
 } from './toolbar';
+import EditOptions from './toolbar/EditOptions';
 import type { NextTheme, SampleStorageData } from './types';
 
 const editorOptions: MonacoCodeEditorProps['options'] = {
-  lineHeight: 1.5,
+  // seems the better in windows
+  lineHeight: 1.65,
   tabSize: 2,
-  fontSize: 16,
+  fontSize: 14.5,
   fontWeight: '300',
   fontFamily: 'var(--font-mono)',
   fontLigatures: 'no-common-ligatures, slashed-zero',
   letterSpacing: 0.025,
   minimap: { enabled: false },
-  theme: 'vs',
   scrollbar: {
     verticalHasArrows: false,
     horizontalHasArrows: false,
@@ -77,8 +89,12 @@ const { themes, ThemesInjection } = createThemesPlugin({
     { key: 'atom-one-light', name: 'Atom One Light' },
     { key: 'atomize', name: 'Atomize(Atom One Dark)' },
     { key: 'csb-default', name: 'CSB Default' },
-    { key: 'github-light', name: 'GitHub Light' },
-    { key: 'webstorm-darcula', name: 'Webstorm Darcula' },
+    { key: 'github-light', name: 'GitHub Light', theme: githubLight },
+    {
+      key: 'webstorm-darcula',
+      name: 'Webstorm Darcula',
+      url: new URL('webstorm-darcula.json', assetsOf('themes')),
+    },
     { key: 'webstorm-dark', name: 'Webstorm Dark' },
   ],
   // baseUrl: assetsOf('themes'),
@@ -91,7 +107,7 @@ const App = () => {
     'monaco-sample-data',
     {},
   );
-  const { locale, theme, filename } = sampleData;
+  const { locale, theme, filename, customOptions } = sampleData;
 
   const [nextTheme, setNextTheme] = useState<NextTheme>({ loading: false });
 
@@ -105,11 +121,18 @@ const App = () => {
   const [options, muiTheme, themeColors] = useMemo(() => {
     const { name, colors, isDark } = revertMonacoThemeSkeleton(theme);
     return [
-      { ...editorOptions, theme: name },
+      { ...editorOptions, ...(customOptions ?? {}), theme: name },
       createTheme(isDark, colors),
       colors,
     ];
-  }, [theme]);
+  }, [theme, customOptions]);
+
+  const [activeLanguage, setActiveLanguage] = useState<
+    TextmateActiveLanguage | undefined
+  >();
+
+  const [openThemeConverter, setOpenThemeConverter] = useState(false);
+  const [openEditOptions, setOpenEditOptions] = useState(false);
 
   const update = (frag: Partial<SampleStorageData>) =>
     storeSample((prev) => ({ ...prev, ...frag }));
@@ -117,26 +140,38 @@ const App = () => {
   return (
     <ThemeProvider theme={muiTheme}>
       <CssBaseline />
+      <ThemeConverter.Dialog
+        open={openThemeConverter}
+        onClose={() => setOpenThemeConverter(false)}
+      />
+      <EditOptions
+        open={openEditOptions}
+        onClose={() => setOpenEditOptions(false)}
+        onSubmit={(nextOptions) => {
+          update({ customOptions: nextOptions });
+        }}
+        options={customOptions ?? editorOptions}
+      />
       <MonacoProvider
-        loader={{ baseUrl: monacoBaseUrl, query: { locale } }}
+        loader={{ query: { locale } }}
         style={{
           '--rmBackdropBg': themeColors.background,
           '--rmBorderColor': themeColors.borderColor,
           '--rmTextColor': themeColors.text,
         }}
         components={{ ProgressBar }}
+        texts={{
+          tmStatus: ({ active }) =>
+            \`Textmate \${active ? 'active' : 'inactive'}\`,
+        }}
       >
         <TextmateInjection
-          debug={false}
-          // onChange={(active) => console.log(active)}
-          provider={customTmProvider}
-          filter={filterTmCodeSet}
-          baseUrl={assetsOf('tm')}
+          debug
+          onChange={setActiveLanguage}
+          provider={tmProvider}
+          filter={tmFilter}
         />
-        <LocaleInjection
-          locale={locale}
-          // baseUrl={assetsOf('locales')}
-        />
+        <LocaleInjection debug locale={locale} />
         <ThemesInjection
           debug
           theme={options.theme}
@@ -149,6 +184,7 @@ const App = () => {
             setNextTheme((prev) => ({ ...prev, loading: false }));
           }}
         />
+        <TypescriptInjection />
         <TopBar>
           <LocaleSelect
             value={locale}
@@ -164,6 +200,17 @@ const App = () => {
             disabled={nextTheme.loading}
             onChange={(name) => setNextTheme({ name, loading: true })}
           />
+          <Box display={'flex'} sx={{ ml: 'auto' }} gap={'4px'}>
+            <Button size={'medium'} onClick={() => setOpenThemeConverter(true)}>
+              Theme Converter
+            </Button>
+            <Button
+              sx={{ minWidth: 'auto' }}
+              onClick={() => setOpenEditOptions(true)}
+            >
+              <Settings />
+            </Button>
+          </Box>
         </TopBar>
         <MonacoCodeEditor
           ref={ref}
@@ -171,6 +218,12 @@ const App = () => {
           className={cssScrollBar}
           options={options}
         />
+        <FootBar>
+          <LanguageDisplay
+            value={activeLanguage?.languageId ?? 'plaintext'}
+            tmActive={activeLanguage?.isActive}
+          />
+        </FootBar>
       </MonacoProvider>
     </ThemeProvider>
   );
@@ -185,6 +238,7 @@ const ProgressBar = ({
   if (!mode) return null;
   return (
     <LinearProgress
+      key={isIndeterminate ? 'indeterminate' : 'determinate'}
       variant={isIndeterminate ? 'indeterminate' : 'determinate'}
       value={percent}
       sx={{ minWidth: 320 }}
@@ -192,7 +246,7 @@ const ProgressBar = ({
   );
 };
 
-const customTmProvider: TextmateProviderCallback = ({ language, extname }) => {
+const tmProvider: TextmateProviderCallback = ({ language, extname }) => {
   if (extname === '.prisma') {
     return {
       url: new URL('prisma.tmLanguage.json', tmConfig('baseUrl')),
@@ -210,13 +264,10 @@ const customTmProvider: TextmateProviderCallback = ({ language, extname }) => {
   }
 };
 
-const filterTmCodeSet: TextmateFilterCodeSetCallback = (
-  code: TextmateCodeSet
-) => {
+const tmFilter: TextmateFilterCodeSetCallback = (code: TextmateCodeSet) => {
   return code;
 };
 
 export default App;
-
 `.trim(),
 };

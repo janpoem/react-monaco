@@ -2,6 +2,7 @@
   --font-sans: "Inter", "Noto Sans SC", "PingFang SC", "Microsoft YaHei UI",
     "Microsoft YaHei", "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono", "Roboto Mono", monospace;
+  --font-mono-weight: 300;
 
   font-size: 14px;
   line-height: 1.5;
@@ -34,6 +35,7 @@ a {
 code,
 pre {
   font-family: var(--font-mono);
+  font-weight: var(--font-mono-weight);
 }
 
 *,

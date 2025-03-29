@@ -129,8 +129,8 @@ const JSONEditor = forwardRef(
 const Container = styled(Box)<{ fontSize?: number }>`
   --jeFontSizeInput: ${({ fontSize }) => toNumber(fontSize, 14)};
   --jeLineHeightInput: 1.5;
-
-  --jeFontWeight: 300;
+  
+  --jeFontWeight: var(--font-mono-weight);
   --jeFontSize: calc(var(--jeFontSizeInput) * 1px);
   --jeLineHeight: calc(var(--jeFontSizeInput) * var(--jeLineHeightInput) * 1px);
 

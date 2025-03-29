@@ -8,11 +8,9 @@ import {
   ThemeProvider,
 } from '@mui/material';
 import {
-  type DownloadingParams,
   MonacoCodeEditor,
   type MonacoCodeEditorProps,
   type MonacoCodeEditorRef,
-  MonacoLoaderProcess,
   type MonacoPresetProgressBarProps,
   MonacoProvider,
   revertMonacoThemeSkeleton,
@@ -31,8 +29,9 @@ import { useLocalStorage } from 'usehooks-ts';
 import type { TextmateActiveLanguage } from '../../../src/plugins/textmate';
 import ThemeConverter from './experimental/theme-converter';
 import { TypescriptInjection } from './experimental/typescript';
-import { monacoBaseUrl } from './presets';
+import { assetsOf } from './presets';
 import { createTheme } from './theme';
+import githubLight from './thtmes/github-light';
 import {
   FileSelect,
   FileSelectOptions,
@@ -46,11 +45,12 @@ import EditOptions from './toolbar/EditOptions';
 import type { NextTheme, SampleStorageData } from './types';
 
 const editorOptions: MonacoCodeEditorProps['options'] = {
-  lineHeight: 1.5,
+  // seems the better in windows
+  lineHeight: 1.65,
   tabSize: 2,
-  fontSize: 16,
-  // fontWeight: '300',
-  fontFamily: 'Roboto Mono',
+  fontSize: 14.5,
+  fontWeight: '300',
+  fontFamily: 'var(--font-mono)',
   fontLigatures: 'no-common-ligatures, slashed-zero',
   letterSpacing: 0.025,
   minimap: { enabled: false },
@@ -84,8 +84,12 @@ const { themes, ThemesInjection } = createThemesPlugin({
     { key: 'atom-one-light', name: 'Atom One Light' },
     { key: 'atomize', name: 'Atomize(Atom One Dark)' },
     { key: 'csb-default', name: 'CSB Default' },
-    { key: 'github-light', name: 'GitHub Light' },
-    { key: 'webstorm-darcula', name: 'Webstorm Darcula' },
+    { key: 'github-light', name: 'GitHub Light', theme: githubLight },
+    {
+      key: 'webstorm-darcula',
+      name: 'Webstorm Darcula',
+      url: new URL('webstorm-darcula.json', assetsOf('themes')),
+    },
     { key: 'webstorm-dark', name: 'Webstorm Dark' },
   ],
   // baseUrl: assetsOf('themes'),
@@ -141,10 +145,10 @@ const App = () => {
         onSubmit={(nextOptions) => {
           update({ customOptions: nextOptions });
         }}
-        options={customOptions ?? options}
+        options={customOptions ?? editorOptions}
       />
       <MonacoProvider
-        loader={{ baseUrl: monacoBaseUrl, query: { locale } }}
+        loader={{ query: { locale } }}
         style={{
           '--rmBackdropBg': themeColors.background,
           '--rmBorderColor': themeColors.borderColor,
@@ -152,26 +156,19 @@ const App = () => {
         }}
         components={{ ProgressBar }}
         texts={{
-          [MonacoLoaderProcess.Initializing]: 'Monaco is running...',
-          [MonacoLoaderProcess.Loading]: ({
-            isFetchDownload,
-            percent,
-          }: DownloadingParams) =>
-            `Pulling monaco assets ${isFetchDownload ? ` ${percent}%` : ''}...`,
-          [MonacoLoaderProcess.Preparing]: 'Going to fly...',
+          tmStatus: ({ active }) =>
+            `Textmate ${active ? 'active' : 'inactive'}`,
         }}
       >
         <TextmateInjection
+          debug
           onChange={setActiveLanguage}
-          provider={customTmProvider}
-          filter={filterTmCodeSet}
-          // baseUrl={assetsOf('tm')}
+          provider={tmProvider}
+          filter={tmFilter}
         />
-        <LocaleInjection
-          locale={locale}
-          // baseUrl={assetsOf('locales')}
-        />
+        <LocaleInjection debug locale={locale} />
         <ThemesInjection
+          debug
           theme={options.theme}
           loadTheme={nextTheme.name}
           onLoad={(res) => {
@@ -244,7 +241,7 @@ const ProgressBar = ({
   );
 };
 
-const customTmProvider: TextmateProviderCallback = ({ language, extname }) => {
+const tmProvider: TextmateProviderCallback = ({ language, extname }) => {
   if (extname === '.prisma') {
     return {
       url: new URL('prisma.tmLanguage.json', tmConfig('baseUrl')),
@@ -262,9 +259,7 @@ const customTmProvider: TextmateProviderCallback = ({ language, extname }) => {
   }
 };
 
-const filterTmCodeSet: TextmateFilterCodeSetCallback = (
-  code: TextmateCodeSet,
-) => {
+const tmFilter: TextmateFilterCodeSetCallback = (code: TextmateCodeSet) => {
   return code;
 };
 

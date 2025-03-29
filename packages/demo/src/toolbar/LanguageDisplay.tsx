@@ -1,4 +1,5 @@
 import { Box, styled, Tooltip, useTheme } from '@mui/material';
+import { useMonacoText } from '@react-monaco/core';
 
 export type LanguageDisplayProps = {
   value: string;
@@ -7,6 +8,7 @@ export type LanguageDisplayProps = {
 
 export const LanguageDisplay = ({ value, tmActive }: LanguageDisplayProps) => {
   const { palette } = useTheme();
+  const text = useMonacoText('tmStatus', { active: tmActive });
 
   return (
     <Box
@@ -34,7 +36,7 @@ export const LanguageDisplay = ({ value, tmActive }: LanguageDisplayProps) => {
               color: tmActive ? palette.text.primary : palette.text.disabled,
             }}
           >
-            <small>(Textmate {tmActive ? 'active' : 'inactive'})</small>
+            <small>{text}</small>
           </Box>
         </Tooltip>
       )}
