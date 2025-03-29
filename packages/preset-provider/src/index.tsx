@@ -17,7 +17,7 @@ export type PresetComponents = Record<string, PresetComponent>;
 
 export type PresetText = string;
 
-// biome-ignore lint/suspicious/noExplicitAny: Here allow any
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export type PresetTextCallback<Params = any> = (params: Params) => string;
 
 export type PresetTexts = Record<
