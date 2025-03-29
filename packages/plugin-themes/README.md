@@ -7,16 +7,20 @@ React Monaco Editor 的主题管理插件。
 `@react-monaco/core` 内置四个主题 `vs` `vs-dark` `hc-light` `hc-black` （Textmate
 主题扩展）。
 
-目前已实现主题加载外部 json 实现。
+目前支持两种方式声明主题 
+
+- 项目本地代码实现 `MonacoCustomTheme`
+- 外部远程 json 声明
 
 ## 使用说明
 
 因为要保证主题可外部加载，所以主题插件稍微设计的有些复杂。
 
-首选要通过 `createThemesPlugin` 来创建主题插件。
+首先要通过 `createThemesPlugin` 来创建主题插件。
 
 ```tsx
 import { createThemesPlugin } from '@react-monaco/plugin-themes';
+import githubLight from './themes/github-light';
 
 const { themes, ThemesInjection } = createThemesPlugin({
   themes: [
@@ -24,11 +28,17 @@ const { themes, ThemesInjection } = createThemesPlugin({
     { key: 'atom-one-light', name: 'Atom One Light' },
     { key: 'atomize', name: 'Atomize(Atom One Dark)' },
     { key: 'csb-default', name: 'CSB Default' },
-    { key: 'github-light', name: 'GitHub Light' },
-    { key: 'webstorm-darcula', name: 'Webstorm Darcula' },
+    // 使用本地源代码的主题
+    { key: 'github-light', name: 'GitHub Light', theme: githubLight },
+    {
+      key: 'webstorm-darcula',
+      name: 'Webstorm Darcula',
+      // 自定义主题 url 提供
+      url: `http://your.domain/monaco-themes/webstorm-darcula.json`,
+    },
     { key: 'webstorm-dark', name: 'Webstorm Dark' },
   ],
-  baseUrl: `${location.origin}/assets/themes/`,
+  baseUrl: 'http://your.domain2/themes/',
 });
 ```
 

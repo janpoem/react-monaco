@@ -6,6 +6,7 @@ export type MonacoThemeDeclaration = {
   key: string;
   name: string;
   url?: string | URL;
+  theme?: MonacoCustomTheme;
 };
 
 export type CreateThemesPluginOptions = {

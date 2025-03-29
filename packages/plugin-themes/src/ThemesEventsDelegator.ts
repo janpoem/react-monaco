@@ -19,7 +19,9 @@ export class ThemesEventsDelegator extends BaseEventsDelegator<MonacoEventsDefin
 
   themeName?: string;
 
-  themes = new Map<string, MonacoCustomTheme>();
+  loadedThemes: Record<string, MonacoCustomTheme> = {};
+
+  definedThemes: Record<string, boolean> = {};
 
   loading?: string;
 
@@ -57,13 +59,14 @@ export class ThemesEventsDelegator extends BaseEventsDelegator<MonacoEventsDefin
   }: MonacoEventsDefinition['prepareAssets']) => {
     try {
       const theme = this.pickTheme(this.themeName);
+      const loadedTheme = theme.theme ?? this.loadedThemes[theme.key];
 
-      if (this.themes.has(theme.key)) {
+      if (loadedTheme != null) {
         this.isDebug && console.log(`Locale: '${theme.key}' is loaded`);
+        this.defineTheme(loadedTheme);
         this.props.onLoad?.({
           isSuccess: true,
-          // biome-ignore lint/style/noNonNullAssertion: <explanation>
-          theme: this.themes.get(theme.key)!,
+          theme: loadedTheme,
         });
         return;
       }
@@ -89,7 +92,7 @@ export class ThemesEventsDelegator extends BaseEventsDelegator<MonacoEventsDefin
         if (!isMonacoCustomTheme(theme)) {
           throw new Error(`'${this.assetKey}' not a valid monaco theme data`);
         }
-        this.themes.set(this.themeName, theme);
+        this.loadedThemes[this.themeName] = theme;
         this.props.onLoad?.({ isSuccess: true, theme });
       } catch (err) {
         console.error(`Themes: parse '${this.assetKey}' JSON error`, err);
@@ -100,11 +103,8 @@ export class ThemesEventsDelegator extends BaseEventsDelegator<MonacoEventsDefin
   };
 
   mounting = ({ monaco }: MonacoEventsDefinition['mounting']) => {
-    if (notEmptyStr(this.themeName) && this.themes.has(this.themeName)) {
-      const theme = this.themes.get(this.themeName);
-      if (theme != null) {
-        monaco.editor.defineTheme(theme.name, theme.data);
-      }
+    if (notEmptyStr(this.themeName)) {
+      this.defineTheme(this.loadedThemes[this.themeName]);
     }
   };
 
@@ -129,13 +129,14 @@ export class ThemesEventsDelegator extends BaseEventsDelegator<MonacoEventsDefin
       }
 
       const themeDec = this.pickTheme(name);
+      const loadedTheme = themeDec.theme ?? this.loadedThemes[themeDec.key];
 
-      if (this.themes.has(themeDec.key)) {
+      if (loadedTheme != null) {
         this.isDebug && console.log(`Themes: '${name}' is loaded`);
+        this.defineTheme(loadedTheme);
         this.props.onLoad?.({
           isSuccess: true,
-          // biome-ignore lint/style/noNonNullAssertion: <explanation>
-          theme: this.themes.get(themeDec.key)!,
+          theme: loadedTheme,
           isPreload: true,
         });
         return;
@@ -152,9 +153,8 @@ export class ThemesEventsDelegator extends BaseEventsDelegator<MonacoEventsDefin
         throw new Error(`'${this.assetKey}' not a valid monaco theme data`);
       }
 
-      monaco.editor.defineTheme(theme.name, theme.data);
-
-      this.themes.set(themeDec.key, theme);
+      this.loadedThemes[themeDec.key] = theme;
+      this.defineTheme(theme);
       this.props.onLoad?.({ isSuccess: true, theme, isPreload: true });
     } catch (err) {
       this.isDebug && console.log(`Themes: ${errMsg(err)}`);
@@ -162,5 +162,18 @@ export class ThemesEventsDelegator extends BaseEventsDelegator<MonacoEventsDefin
     } finally {
       this.loading = undefined;
     }
+  };
+
+  defineTheme = (theme?: MonacoCustomTheme) => {
+    if (theme == null) return this;
+    if (typeof monaco === 'undefined') {
+      console.log('Themes: Global monaco undefined');
+      return this;
+    }
+    if (!this.definedThemes[theme.name]) {
+      this.definedThemes[theme.name] = true;
+      monaco.editor.defineTheme(theme.name, theme.data);
+    }
+    return this;
   };
 }
