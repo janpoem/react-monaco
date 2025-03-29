@@ -1,0 +1,67 @@
+{
+  "name": "@react-monaco/core",
+  "version": "1.0.0",
+  "description": "A hook for load remote resources in react.",
+  "author": "Jiankai Zeng <janpoem@163.com>",
+  "license": "MIT",
+  "keywords": [
+    "use remote loader",
+    "react remote loader",
+    "remote loader hook",
+    "remote loader",
+    "resource loader",
+    "loader",
+    "react",
+    "hook"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/janpoem/react-monaco.git"
+  },
+  "main": "dist/cjs/index.cjs",
+  "module": "dist/esm/index.js",
+  "types": "dist/esm/index.d.ts",
+  "type": "module",
+  "files": ["dist"],
+  "exports": {
+    ".": {
+      "bun": {
+        "default": "./src/index.ts"
+      },
+      "import": {
+        "default": "./dist/esm/index.js",
+        "types": "./dist/esm/index.d.ts"
+      },
+      "require": {
+        "default": "./dist/esm/index.cjs",
+        "types": "./dist/esm/index.d.cts"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "lint": "biome lint --error-on-warnings ./src",
+    "ts-check": "bunx --bun tsc --noEmit",
+    "rollup": "bunx --bun rollup -c rollup.config.ts",
+    "dev": "bun run rollup --watch",
+    "build": "bun run lint && bun run ts-check && bun run rollup",
+    "pub": "bun publish --access public"
+  },
+  "dependencies": {
+    "@emotion/css": "^11.13.5",
+    "@zenstone/preset-provider": "workspace:*",
+    "@zenstone/ts-utils": "^0.0.10",
+    "@zenstone/use-remote-loader": "workspace:*",
+    "emittery": "^1.1.0",
+    "just-compare": "^2.3.0",
+    "react": "^19.0.0",
+    "usehooks-ts": "^3.1.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.10",
+    "monaco-editor": "^0.52.2"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0"
+  }
+}

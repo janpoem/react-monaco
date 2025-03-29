@@ -1,0 +1,27 @@
+{
+  "name": "@react-monaco/assets",
+  "version": "1.0.1",
+  "description": "React monaco editor related assets.",
+  "author": "Jiankai Zeng <janpoem@163.com>",
+  "license": "MIT",
+  "keywords": [
+    "react monaco editor",
+    "monaco editor",
+    "monaco assets",
+    "react monaco",
+    "monaco",
+    "assets"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/janpoem/react-monaco.git"
+  },
+  "main": "dist/cjs/index.cjs",
+  "module": "dist/esm/index.js",
+  "types": "dist/esm/index.d.ts",
+  "type": "module",
+  "files": ["assets"],
+  "scripts": {
+    "pub": "bun publish --access public"
+  }
+}
