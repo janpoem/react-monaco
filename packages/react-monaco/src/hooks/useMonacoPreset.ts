@@ -3,18 +3,15 @@ import {
   usePresetProvider,
 } from '@zenstone/preset-provider';
 import { type ComponentProps, useMemo } from 'react';
-import type { MonacoPresetComponents, MonacoPresetTexts } from '../presets';
+import type { MonacoComponents, MonacoTexts } from '../presets';
 
-export const useMonacoPreset = usePresetProvider<
-  MonacoPresetComponents,
-  MonacoPresetTexts
->;
+export const useMonacoPreset = usePresetProvider<MonacoComponents, MonacoTexts>;
 
 type TextsParams<T> = T extends PresetTextCallback<infer P> ? P : unknown;
 
 export const useMonacoText = <
-  Key extends keyof MonacoPresetTexts,
-  Params extends TextsParams<MonacoPresetTexts[Key]>,
+  Key extends keyof MonacoTexts,
+  Params extends TextsParams<MonacoTexts[Key]>,
 >(
   key: Key,
   // @ts-ignore
@@ -25,8 +22,8 @@ export const useMonacoText = <
 };
 
 export const useMonacoSelectText = <
-  Key extends keyof MonacoPresetTexts,
-  Params extends TextsParams<MonacoPresetTexts[Key]>,
+  Key extends keyof MonacoTexts,
+  Params extends TextsParams<MonacoTexts[Key]>,
 >(
   text: string | null | undefined,
   key: Key,
@@ -37,11 +34,9 @@ export const useMonacoSelectText = <
   return useMemo(() => select(text, key, params), [select, text, key, params]);
 };
 
-export const useMonacoCreateElement = <
-  Name extends keyof MonacoPresetComponents,
->(
+export const useMonacoCreateElement = <Name extends keyof MonacoComponents>(
   name: Name,
-  props: ComponentProps<MonacoPresetComponents[Name]>,
+  props: ComponentProps<MonacoComponents[Name]>,
 ) => {
   const create = useMonacoPreset().makeChildren<Name>;
   return useMemo(() => create(name, props), [create, name, props]);

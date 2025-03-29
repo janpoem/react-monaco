@@ -24,8 +24,8 @@ import { MonacoLoader, type MonacoLoaderProps } from './MonacoLoader';
 import {
   initComponents,
   initTexts,
-  type MonacoPresetComponents,
-  type MonacoPresetTexts,
+  type MonacoComponents,
+  type MonacoTexts,
 } from './presets';
 import {
   cssVerticalContainer,
@@ -77,8 +77,8 @@ const Context = createContext<MonacoContextType>({
 });
 
 export type MonacoProviderProps = {
-  texts?: Partial<MonacoPresetTexts>;
-  components?: Partial<MonacoPresetComponents>;
+  texts?: Partial<MonacoTexts>;
+  components?: Partial<MonacoComponents>;
   loader?: MonacoLoaderProps;
   events?: EventsInput<MonacoEventsDefinition>;
   style?: Partial<PresetStyleVars & CSSProperties>;

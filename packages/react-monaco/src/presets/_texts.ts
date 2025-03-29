@@ -22,17 +22,16 @@ export type DownloadingParams = {
  * 预设文本
  */
 export type MonacoPresetTexts = Record<MonacoPresetErrorsKeys, PresetText> & {
-  // ERR_WORKERS_EMPTY: PresetText;
-  // ERR_NO_CONTAINER: PresetText;
-  // ERR_INVALID_PRELOAD_PROCESS: PresetText;
-  // ERR_INVALID_CODE_INPUT: PresetText;
-  // ERR_MONACO_UNDEFINED: PresetText;
-  // ERR_UNKNOWN: PresetText;
   [MonacoLoaderProcess.Initializing]: PresetText;
   [MonacoLoaderProcess.Loading]: PresetTextCallback<DownloadingParams>;
   [MonacoLoaderProcess.Preparing]: PresetText;
   [MonacoLoaderProcess.Completed]: PresetText; // will not use
-  // [key: string]: PresetText;
+};
+
+export type MonacoTexts = MonacoPresetTexts & {
+  [K in Exclude<string, keyof MonacoPresetTexts>]:
+    | PresetText
+    | PresetTextCallback;
 };
 
 export const initTexts = (): MonacoPresetTexts => ({
