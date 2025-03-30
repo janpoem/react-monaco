@@ -1,6 +1,6 @@
 {
   "name": "@react-monaco/core",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A hook for load remote resources in react.",
   "author": "Jiankai Zeng <janpoem@163.com>",
   "license": "MIT",

@@ -127,6 +127,13 @@ export type MonacoModelChangeParams = MonacoModelCreateParams & {
   event: monaco.editor.IModelContentChangedEvent;
 };
 
+export type MonacoModelDisposeParams = MonacoModelCreateParams;
+
+export type MonacoInputChangeParams = {
+  monaco?: typeof monaco;
+  input: MonacoCodeInput;
+};
+
 export type MonacoEditorPrepareParams = {
   mode: 'code' | string;
   monaco: typeof monaco;
@@ -143,6 +150,8 @@ export type MonacoEditorMountParams = {
   image: MonacoTransientStateImage;
 };
 
+export type MonacoEditorDisposeParams = MonacoEditorPrepareParams;
+
 export type MonacoEditorFocusAndBlurParams = {
   mode: 'code' | string;
   monaco: typeof monaco;
@@ -155,11 +164,15 @@ export type MonacoEventsDefinition = RemoteLoaderEventsDefinition & {
   prepareModel: MonacoModelPrepareParams;
   createModel: MonacoModelCreateParams;
   changeModel: MonacoModelChangeParams;
+  disposeModel: MonacoModelDisposeParams;
+  changeInput: MonacoInputChangeParams;
+
   prepareEditor: MonacoEditorPrepareParams;
   /**
    * Editor 挂载成功事件
    */
-  editor: MonacoEditorMountParams;
+  mountEditor: MonacoEditorMountParams;
+  disposeEditor: MonacoEditorDisposeParams;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -169,7 +182,10 @@ export type MonacoFileCodeInput = {
   filename: string;
   source?: string;
   uri?: string;
+  model?: monaco.editor.ITextModel;
 };
+
+export type MonacoModelInput = monaco.editor.ITextModel;
 
 export type MonacoCodeInput = MonacoFileCodeInput;
 

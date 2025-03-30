@@ -10,16 +10,24 @@ import {
 } from 'react';
 import { useEventCallback, useIsomorphicLayoutEffect } from 'usehooks-ts';
 import { MonacoReadyState } from './constants';
-import { useMonacoPreset, useMonacoTransientState } from './hooks';
+import {
+  useMonacoDebug,
+  useMonacoPreset,
+  useMonacoTransientState,
+} from './hooks';
 import { type MonacoContextType, useMonaco } from './MonacoProvider';
 import { cssVerticalContainer, presetCls } from './styles';
 import type {
   MonacoCodeInput,
+  MonacoEditorDisposeParams,
   MonacoEditorFocusAndBlurParams,
   MonacoEditorMountParams,
   MonacoEditorPrepareParams,
+  MonacoFileCodeInput,
+  MonacoInputChangeParams,
   MonacoModelChangeParams,
   MonacoModelCreateParams,
+  MonacoModelDisposeParams,
   MonacoModelPrepareParams,
 } from './types';
 import { extractExtname, isFileInput } from './utils';
@@ -33,16 +41,20 @@ export type MonacoCodeEditorRef = MonacoContextType & {
 
 export type MonacoCodeEditorProps = {
   input: MonacoCodeInput;
+  debug?: boolean;
   options?: Partial<
     Omit<monaco.editor.IStandaloneEditorConstructionOptions, 'value' | 'model'>
   >;
   className?: string;
   style?: CSSProperties;
-  beforeModel?: (params: MonacoModelPrepareParams) => void;
-  onModel?: (params: MonacoModelCreateParams) => void;
-  onChange?: (params: MonacoModelChangeParams) => void;
-  beforeMount?: (params: MonacoEditorPrepareParams) => void;
-  onMount?: (params: MonacoEditorMountParams) => void;
+  onPrepareModel?: (params: MonacoModelPrepareParams) => void;
+  onCreateModel?: (params: MonacoModelCreateParams) => void;
+  onChangeModel?: (params: MonacoModelChangeParams) => void;
+  onDisposeModel?: (params: MonacoModelDisposeParams) => void;
+  onChangeInput?: (params: MonacoInputChangeParams) => void;
+  onPrepareEditor?: (params: MonacoEditorPrepareParams) => void;
+  onMountEditor?: (params: MonacoEditorMountParams) => void;
+  onDisposeEditor?: (params: MonacoEditorDisposeParams) => void;
   onFocus?: (params: MonacoEditorFocusAndBlurParams) => void;
   onBlur?: (params: MonacoEditorFocusAndBlurParams) => void;
 };
@@ -51,14 +63,18 @@ export const MonacoCodeEditor = forwardRef(
   (
     {
       input,
+      debug: isDebug,
       options,
       className,
       style,
-      beforeModel,
-      onModel,
-      onChange,
-      beforeMount,
-      onMount,
+      onPrepareModel,
+      onCreateModel,
+      onChangeModel,
+      onDisposeModel,
+      onChangeInput,
+      onPrepareEditor,
+      onMountEditor,
+      onDisposeEditor,
       onFocus,
       onBlur,
     }: MonacoCodeEditorProps,
@@ -71,12 +87,19 @@ export const MonacoCodeEditor = forwardRef(
       undefined,
     );
     const isFocusRef = useRef<boolean>(false);
+    const optionsRef = useRef(options);
 
-    const beforeModelFn = useEventCallback(beforeModel);
-    const onModelFn = useEventCallback(onModel);
-    const onChangeFn = useEventCallback(onChange);
-    const beforeMountFn = useEventCallback(beforeMount);
-    const onMountFn = useEventCallback(onMount);
+    const { debug } = useMonacoDebug(['CodeEditor', 'color: yellow'], isDebug);
+
+    const onPrepareModelFn = useEventCallback(onPrepareModel);
+    const onCreateModelFn = useEventCallback(onCreateModel);
+    const onChangeModelFn = useEventCallback(onChangeModel);
+    const onDisposeModelFn = useEventCallback(onDisposeModel);
+    const onChangeInputFn = useEventCallback(onChangeInput);
+
+    const onPrepareEditorFn = useEventCallback(onPrepareEditor);
+    const onMountEditorFn = useEventCallback(onMountEditor);
+    const onDisposeEditorFn = useEventCallback(onDisposeEditor);
     const onFocusFn = useEventCallback(onFocus);
     const onBlurFn = useEventCallback(onBlur);
 
@@ -130,17 +153,22 @@ export const MonacoCodeEditor = forwardRef(
 
     useIsomorphicLayoutEffect(() => {
       if (editorRef.current == null) return;
-      // @ts-ignore
-      editorRef.current.updateOptions(options);
+      if (!compare(optionsRef.current, options)) {
+        optionsRef.current = options;
+        debug('update editor options', options);
+        // @ts-ignore
+        editorRef.current.updateOptions(options);
+      }
     }, [options]);
 
     useIsomorphicLayoutEffect(() => {
       if (editorRef.current == null) return;
-      if (!compare(inputRef.current, input)) {
+      debug('input changed');
+      onChangeInputFn?.({ input, monaco });
+      emitterRef.current?.emit('changeInput', { input, monaco });
+      if (isFileInput(input)) {
         try {
-          inputRef.current = input;
-          modelRef.current?.dispose();
-          modelRef.current = createModel(input);
+          modelRef.current = createFileCodeModel(input);
           editorRef.current.setModel(modelRef.current);
         } catch (error) {
           setError(error);
@@ -152,10 +180,17 @@ export const MonacoCodeEditor = forwardRef(
 
     return <div ref={containerRef} className={cls} />;
 
-    function createModel(input: MonacoCodeInput) {
+    function createFileCodeModel(input: MonacoFileCodeInput) {
       const _monaco = refMonaco();
       if (!isFileInput(input)) {
         throw new Error(getText('ERR_INVALID_CODE_INPUT'));
+      }
+
+      if (input.model) {
+        debug(`reuse '${input.model.getLanguageId()}' model`, {
+          model: input.model,
+        });
+        return input.model;
       }
 
       const { filename, source, uri: iUri } = input;
@@ -172,7 +207,22 @@ export const MonacoCodeEditor = forwardRef(
 
       // 如果指定了 uri ，需要检查全局 monaco 是否已经持有该 uri 的 model
       if (uri != null) {
-        _monaco.editor.getModel(uri)?.dispose();
+        const existingModel = _monaco.editor.getModel(uri);
+        if (existingModel != null) {
+          const p = {
+            input,
+            language,
+            extname,
+            uri,
+            monaco: _monaco,
+            editor: editorRef.current,
+            model: existingModel,
+          };
+          onDisposeModelFn?.(p);
+          emitterRef.current?.emit('disposeModel', p);
+          existingModel.dispose();
+          debug(`dispose model by uri ${uri.toString()}`);
+        }
       }
 
       const params = {
@@ -184,14 +234,17 @@ export const MonacoCodeEditor = forwardRef(
         editor: editorRef.current,
       };
 
-      beforeModelFn?.(params);
+      onPrepareModelFn?.(params);
       emitterRef.current?.emit('prepareModel', params);
+
       const model = _monaco.editor.createModel(source || '', languageId, uri);
+      debug(`create '${languageId}' model`, input);
+
       model.onDidChangeContent((event) => {
-        onChangeFn?.({ ...params, model, event });
+        onChangeModelFn?.({ ...params, model, event });
         emitterRef.current?.emit('changeModel', { ...params, model, event });
       });
-      onModelFn?.({ ...params, model });
+      onCreateModelFn?.({ ...params, model });
       emitterRef.current?.emit('createModel', { ...params, model });
       return model;
     }
@@ -216,10 +269,10 @@ export const MonacoCodeEditor = forwardRef(
         image,
       };
 
-      beforeMount?.(beforeParams);
+      onPrepareEditorFn?.(beforeParams);
       emitterRef.current?.emit('prepareEditor', beforeParams);
 
-      modelRef.current = createModel(
+      modelRef.current = createFileCodeModel(
         source
           ? {
               ...inputRef.current,
@@ -229,10 +282,13 @@ export const MonacoCodeEditor = forwardRef(
       );
 
       if (editorRef.current != null) {
+        onDisposeEditorFn?.(beforeParams);
+        emitterRef.current?.emit('disposeEditor', beforeParams);
         editorRef.current.dispose();
+        debug('dispose editor');
       }
 
-      const editor = _monaco.editor.create(containerRef.current, {
+      const opts: monaco.editor.IStandaloneEditorConstructionOptions = {
         // value: inputRef.current.source || '',
         model: modelRef.current,
         automaticLayout: true,
@@ -242,7 +298,9 @@ export const MonacoCodeEditor = forwardRef(
         formatOnType: true,
         fontLigatures: 'common-ligatures, slashed-zero',
         ...options,
-      });
+      };
+      const editor = _monaco.editor.create(containerRef.current, opts);
+      debug('create editor', opts);
 
       const params = {
         mode: 'code',
@@ -251,8 +309,8 @@ export const MonacoCodeEditor = forwardRef(
         model: modelRef.current,
       };
 
-      onMountFn?.({ ...params, image });
-      emitterRef.current?.emit('editor', { ...params, image });
+      onMountEditorFn?.({ ...params, image });
+      emitterRef.current?.emit('mountEditor', { ...params, image });
 
       if (scroll) editor.setScrollPosition(scroll);
       if (position) {
