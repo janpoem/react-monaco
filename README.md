@@ -28,7 +28,7 @@
 
 [`@react-monaco/demo`](./packages/demo) - 上述所有功能特性的合并演示项目。 
 
-[@react-monaco 在线演示](https://static.kephp.com/react-monaco/0.1.4/index.html) （使用 jsdelivr CDN 资源，可能国内访问略慢）。
+[@react-monaco 在线演示](https://static.kephp.com/react-monaco/0.1.5/index.html) （使用 jsdelivr CDN 资源，可能国内访问略慢）。
 
 ![react-monaco-0.1.4-5](https://doc-assets.janpoem.workers.dev/images/react-monaco-0.1.4-5.png)
 

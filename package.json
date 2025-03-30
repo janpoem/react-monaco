@@ -1,6 +1,6 @@
 {
   "name": "@react-monaco/repo",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
   "scripts": {
     "exports-tm": "bun scripts/exports-vscode-tm.ts --watch",
@@ -26,7 +26,8 @@
     "@zenstone/ts-utils": "^0.0.10",
     "@semver-sync/sync": "^1.0.1",
     "semver": "^7.7.1",
-    "@types/semver": "^7.7.0"
+    "@types/semver": "^7.7.0",
+    "monaco-editor": "^0.52.2"
   },
   "peerDependencies": {
     "typescript": "^5"

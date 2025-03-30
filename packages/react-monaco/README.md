@@ -7,6 +7,8 @@ Monaco Editor 在 React 上的实现，非常轻量、核心化，易于分层�
 所有 `@react-monaco/core` 或 `@react-monaco/plugin-*`
 ，皆使用外部资源加载的方式，本身的核心代码非常少，并提供多种配置方式。
 
+[Demo 演示](https://static.kephp.com/react-monaco/0.1.5/index.html) - 支持 model 复用模式，全 debug 开启
+
 ![react-monaco-0.1.4-5](https://doc-assets.janpoem.workers.dev/images/react-monaco-0.1.4-5.png)
 
 ![react-monaco-0.1.4-1](https://doc-assets.janpoem.workers.dev/images/react-monaco-0.1.4-1.png)
@@ -267,7 +269,8 @@ monaco-editor 本体必须保持以下的文件：
 这里稍作解释：
 
 基于对 monaco 源代码的研究，多语言注入的问题，很多写在程序运行时的变量里（运行时变量赋值）。
-即当你的 monaco 在加载时，已经是简体中文的时候，你无法去改变那些已经加载过得 JS 的运行时的变量。
+即当你的 monaco 在加载时，已经是简体中文的时候，你无法去改变那些已经加载过得 JS
+的运行时的变量。
 
 要动态更换多语言，最直接的做法，就是移除原来已经挂载的 JS（UMD 做这种事就很方便），
 修改全局语言值，然后重新加载一次 monaco 主程序（因为你浏览器已经下载过了，第二次是从缓存里面拿，会很快）。
@@ -430,3 +433,69 @@ export type MonacoFileCodeInput = {
 export type MonacoCodeInput = MonacoFileCodeInput;
 ```
 
+## 更新说明
+
+### 1.0.1 - 2025/03/31
+
+- 增加一种 model 复用的机制，允许通过 `MonacoFileCodeInput` 持有 model，并在
+  `MonacoCodeEditor` 中复用（多文件编辑中状态维持）
+- 优化 `MonacoCodeEditor` 事件命名，增加事件 `onDisposeModel` `onDisposeEditor`
+  等事件
+
+model 复用示例代码（只显示最核心的代码）：
+
+```tsx
+import { useState } from 'react';
+
+function App() {
+  const [filename, setFilename] = useState('App.tsx');
+
+  const filesRef = useRef(files);
+
+  const currentFile = useMemo(() => {
+    let item = filesRef.current.find((it) => it.filename === filename);
+    if (item == null) {
+      item = filesRef.current[0];
+    }
+    return item;
+  }, [filename]);
+
+  return (
+    <MonacoProvider>
+      <Select
+        value={currentFile.filename}
+        onChange={(ev) => setFilename(ev.target.value)}
+      >
+        {filesRef.current.map((it) => (
+          <MenuItem key={it.filename} value={it.filename}>
+            {it.filename}
+          </MenuItem>
+        ))}
+      </Select>
+      <MonacoCodeEditor
+        debug
+        input={currentFile}
+        onCreateModel={({ input, model }) => {
+          // 创建一个 model 的时候，我们更新一下 filesRef
+          const it = filesRef.current.find(
+            (it) => it.filename === input.filename,
+          );
+          if (it) {
+            it.model = model;
+          }
+        }}
+      />
+    </MonacoProvider>
+  );
+}
+```
+
+其核心工作原理在于：
+
+1. `onCreateModel` 时候，将 model 和 input 源做绑定，但这时我们写入 `filesRef`
+   ，不需要去触发 update state
+2. `Select.onChange` （或实际项目中 tabs switch），触发组件 update state，以使
+   `onCreateModel` 更新的 `filesRef` 被整个组件内更新。
+
+至此，我们无需额外做什么，编辑中修改的 model 的内容更新，将自动更新同步至
+`filesRef`。并且，我们可以使编辑中的文件，保持其编辑中的状态。
