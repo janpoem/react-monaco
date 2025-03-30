@@ -6,6 +6,7 @@ import type {
   EventsDelegator,
 } from '../types';
 import { linkEvents } from './event-emitter';
+import { debugOutput } from './misc';
 
 type KeysMatching<T, V> = {
   [K in keyof T]-?: T[K] extends V ? K : never;
@@ -64,24 +65,7 @@ export abstract class BaseEventsDelegator<
 
   debug(...args: unknown[]) {
     if (!this.isDebug) return this;
-    let name: string | undefined;
-    let style: string | undefined;
-    if (notEmptyStr(this.scopeName)) {
-      name = this.scopeName;
-    } else if (Array.isArray(this.scopeName)) {
-      [name, style] = this.scopeName;
-    }
-    if (name) {
-      console.log(
-        `%c[%c${name}%c]`,
-        'color: gray',
-        style || 'color: cyan',
-        'color: gray',
-        ...args,
-      );
-    } else {
-      console.log(...args);
-    }
+    debugOutput(this.scopeName, ...args);
     return this;
   }
 
