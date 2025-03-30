@@ -5,6 +5,8 @@ import {
   Button,
   CssBaseline,
   LinearProgress,
+  MenuItem,
+  Select,
   ThemeProvider,
 } from '@mui/material';
 import {
@@ -33,7 +35,6 @@ import { assetsOf } from './presets';
 import { createTheme } from './theme';
 import githubLight from './themes/github-light';
 import {
-  FileSelect,
   FileSelectOptions,
   FootBar,
   LanguageDisplay,
@@ -97,6 +98,7 @@ const { themes, ThemesInjection } = createThemesPlugin({
 
 const App = () => {
   const ref = useRef<MonacoCodeEditorRef | null>(null);
+  const filesRef = useRef(FileSelectOptions);
 
   const [sampleData, storeSample] = useLocalStorage<SampleStorageData>(
     'monaco-sample-data',
@@ -105,13 +107,6 @@ const App = () => {
   const { locale, theme, filename, customOptions } = sampleData;
 
   const [nextTheme, setNextTheme] = useState<NextTheme>({ loading: false });
-
-  const input = useMemo(
-    () =>
-      FileSelectOptions.find((it) => it.filename === filename) ??
-      FileSelectOptions[0],
-    [filename],
-  );
 
   const [options, muiTheme, themeColors] = useMemo(() => {
     const { name, colors, isDark } = revertMonacoThemeSkeleton(theme);
@@ -131,6 +126,14 @@ const App = () => {
 
   const update = (frag: Partial<SampleStorageData>) =>
     storeSample((prev) => ({ ...prev, ...frag }));
+
+  const currentFile = useMemo(() => {
+    let item = filesRef.current.find((it) => it.filename === filename);
+    if (item == null) {
+      item = filesRef.current[0];
+    }
+    return item;
+  }, [filename]);
 
   return (
     <ThemeProvider theme={muiTheme}>
@@ -185,10 +188,18 @@ const App = () => {
             value={locale}
             onChange={(locale) => update({ locale })}
           />
-          <FileSelect
-            value={input}
-            onChange={(it) => update({ filename: it.filename })}
-          />
+          <Select
+            value={currentFile.filename}
+            onChange={(ev) => {
+              update({ filename: ev.target.value });
+            }}
+          >
+            {filesRef.current.map((it) => (
+              <MenuItem key={it.filename} value={it.filename}>
+                {it.filename}
+              </MenuItem>
+            ))}
+          </Select>
           <ThemeSelect
             value={options.theme}
             themes={themes}
@@ -209,9 +220,18 @@ const App = () => {
         </TopBar>
         <MonacoCodeEditor
           ref={ref}
-          input={input}
+          debug
+          input={currentFile}
           className={cssScrollBar}
           options={options}
+          onCreateModel={({ input, model }) => {
+            const it = filesRef.current.find(
+              (it) => it.filename === input.filename,
+            );
+            if (it) {
+              it.model = model;
+            }
+          }}
         />
         <FootBar>
           <LanguageDisplay
