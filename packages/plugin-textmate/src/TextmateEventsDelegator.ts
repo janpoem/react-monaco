@@ -48,7 +48,7 @@ export class TextmateEventsDelegator extends BaseEventsDelegator<MonacoEventsDef
       .register('mounting')
       .register('prepareModel')
       .register('createModel')
-      .register('editor');
+      .register('mountEditor');
   }
 
   get baseUrl() {
@@ -216,7 +216,7 @@ export class TextmateEventsDelegator extends BaseEventsDelegator<MonacoEventsDef
   createModel = ({ monaco, editor }: MonacoEventsDefinition['createModel']) =>
     this.wireVsCodeState(monaco, editor);
 
-  editor = ({ monaco, editor }: MonacoEventsDefinition['editor']) =>
+  mountEditor = ({ monaco, editor }: MonacoEventsDefinition['mountEditor']) =>
     this.wireVsCodeState(monaco, editor);
 
   wireVsCodeState = (
