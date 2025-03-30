@@ -15,6 +15,7 @@ import type {
   ThemeInjectionProps,
 } from './types';
 
+// 这个代码有待优化，做得太心急了
 export class ThemesEventsDelegator extends BaseEventsDelegator<MonacoEventsDefinition> {
   scopeName = ['Themes', 'color: lightgreen'];
 
@@ -48,8 +49,8 @@ export class ThemesEventsDelegator extends BaseEventsDelegator<MonacoEventsDefin
     return this;
   }
 
-  pickTheme = (name?: string) => {
-    if (name && isMonacoBuiltinTheme(name)) {
+  pickTheme = (name?: string, checkBuiltin = true) => {
+    if (checkBuiltin && name && isMonacoBuiltinTheme(name)) {
       throw new Error(`'${name}' is a monaco builtin theme`);
     }
     const theme = this.settings.themes.find((it) => it.key === name);
@@ -70,12 +71,9 @@ export class ThemesEventsDelegator extends BaseEventsDelegator<MonacoEventsDefin
       const loadedTheme = theme.theme ?? this.loadedThemes[theme.key];
 
       if (loadedTheme != null) {
-        this.debug(`theme '${theme.key}' is loaded`);
-        this.defineTheme(loadedTheme);
-        this.props.onLoad?.({
-          isSuccess: true,
-          theme: loadedTheme,
-        });
+        this.debug(`theme '${theme.key}' is defined`);
+        // this.defineTheme(loadedTheme);
+
         return;
       }
 
@@ -110,12 +108,23 @@ export class ThemesEventsDelegator extends BaseEventsDelegator<MonacoEventsDefin
   };
 
   mounting = ({ monaco }: MonacoEventsDefinition['mounting']) => {
-    if (notEmptyStr(this.themeName)) {
-      this.defineTheme(this.loadedThemes[this.themeName]);
+    if (notEmptyStr(this.themeName) && !isMonacoBuiltinTheme(this.themeName)) {
+      const themeDec = this.settings.themes.find(
+        (it) => it.key === this.themeName,
+      );
+      const theme = themeDec?.theme ?? this.loadedThemes[this.themeName];
+      if (theme) {
+        this.defineTheme(theme);
+        this.props.onLoad?.({
+          isSuccess: true,
+          theme: theme,
+        });
+      }
     }
   };
 
   preloadTheme = async (name?: string) => {
+    this.debug(`preloadTheme ${name}`);
     try {
       if (typeof monaco === 'undefined') {
         throw new Error('Global monaco undefined');

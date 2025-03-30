@@ -1,6 +1,6 @@
 {
   "name": "@react-monaco/plugin-themes",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Themes plugin for react monaco editor.",
   "author": "Jiankai Zeng <janpoem@163.com>",
   "license": "MIT",
