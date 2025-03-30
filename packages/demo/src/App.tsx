@@ -17,6 +17,7 @@ import {
 } from '@react-monaco/core';
 import { LocaleInjection } from '@react-monaco/plugin-locale';
 import {
+  type TextmateActiveLanguage,
   type TextmateCodeSet,
   type TextmateFilterCodeSetCallback,
   TextmateInjection,
@@ -26,12 +27,11 @@ import {
 import { createThemesPlugin } from '@react-monaco/plugin-themes';
 import { useMemo, useRef, useState } from 'react';
 import { useLocalStorage } from 'usehooks-ts';
-import type { TextmateActiveLanguage } from '../../../src/plugins/textmate';
 import ThemeConverter from './experimental/theme-converter';
 import { TypescriptInjection } from './experimental/typescript';
 import { assetsOf } from './presets';
 import { createTheme } from './theme';
-import githubLight from './thtmes/github-light';
+import githubLight from './themes/github-light';
 import {
   FileSelect,
   FileSelectOptions,

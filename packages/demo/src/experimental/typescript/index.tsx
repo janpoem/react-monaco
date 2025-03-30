@@ -31,7 +31,7 @@ export const [setupTypescript, tsConfig] = makeConfigurable({
 });
 
 export const TypescriptInjection = (props: TypescriptInjectionProps) => {
-  const { emitterRef, setError } = useMonaco();
+  const { emitterRef, setError, lifecycleId } = useMonaco();
   const delegatorRef = useRef<TypescriptEventsDelegator>(null);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
@@ -50,7 +50,7 @@ export const TypescriptInjection = (props: TypescriptInjectionProps) => {
       delegatorRef.current?.eject(emitterRef.current);
       delegatorRef.current = null;
     };
-  }, []);
+  }, [lifecycleId]);
 
   return null;
 };
