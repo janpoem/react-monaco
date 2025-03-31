@@ -11,7 +11,7 @@
 bun i
 ```
 
-第一获取该项目，所有子项目皆未包含 `dist` ，无法启动 `demo` 项目，请现在根目录里执行：
+第一次获取项目源代码，所有子项目皆未包含 `dist` ，是无法启动 `demo` 项目的，请先在根目录里执行：
 
 ```bash
 bun build
@@ -23,7 +23,7 @@ bun build
 bun dev
 ```
 
-`bun build` 会去删除已存在的 `dist` 目录，重新构建新的代码。`bun dev` 则不会去删除，只管构建。
+`bun build` 会去删除已存在的 `dist` 目录，重新构建新的代码。`bun dev` 则不会去删除，只管 watch source 和构建。
 
 然后，进入 `packages/demo` 目录，执行 `bun dev` ，即可开启本地开发模式。
 
