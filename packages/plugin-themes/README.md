@@ -120,6 +120,12 @@ function App() {
 `ThemesInjection` 的 `loadTheme` 用于接收变更后的主题名，接受到变化后，会触发
 `ThemesInjection` 内部去加载对应的主题（如果主题已存在，会以成功状态回调 `onLoad`）。
 
+
+## 开发说明
+
+请参考 [开发说明](https://github.com/janpoem/react-monaco/blob/main/docs/DEVEL_GUIDE.md)
+
+
 ## 主题进阶
 
 **首先**，对主题定义的结构进行了扩展，参考如下 `MonacoCustomTheme` 。
@@ -328,4 +334,3 @@ export const createMuiTheme = (
 
 每次更换主题时 `setThemeData({ name, isDark, colors })` ，都会触发 `themeData`
 更新，从而更新 mui 的主题，完成闭环。
-

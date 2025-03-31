@@ -1,13 +1,13 @@
 import type {
+  _PresetTextCallback,
   MonacoCodeEditorProps,
   MonacoThemeInput,
 } from '@react-monaco/core';
-import type { PresetTextCallback } from '@zenstone/preset-provider';
 
 declare module '@react-monaco/core' {
   // @ts-ignore
-  interface MonacoPresetTexts {
-    tmStatus: PresetTextCallback<TmStatusParams>;
+  interface MonacoTexts {
+    tmStatus: _PresetTextCallback<TmStatusParams>;
   }
 }
 

@@ -70,3 +70,7 @@ monaco 的主文件，以覆盖全局已加载，这和 monaco 本身的多语�
 如何生效，可以参考我做的 [monaco umd 打包](https://github.com/janpoem/rollup-monaco-bundler)
 项目。
 
+
+## 开发说明
+
+请参考 [开发说明](https://github.com/janpoem/react-monaco/blob/main/docs/DEVEL_GUIDE.md)

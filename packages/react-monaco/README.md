@@ -208,6 +208,11 @@ import { setupMonaco, repoUrlOf } from '@react-monaco/core';
 import { setupTextmate } from '@react-monaco/plugin-textmate';
 
 setupMonaco({
+  // 改用 jsdmirror 仓库
+  repo: 'jsdmirror',
+  // 也可以指定 assetsBaseUrl
+  // 如果指定了 assetsBaseUrl，则所有资源请求优化走 assetsBaseUrl
+  // wasm 除外，wasm 仍然固定跟 repo 走
   assetsBaseUrl: 'http://your.domain/monaco/',
 });
 
@@ -249,6 +254,10 @@ console.log(new URL('test', 'http://your.domain/entry/A/B/C/').href);
 ```
 
 结论：请确保所有 `baseUrl` 以 `/` 结尾。
+
+## 开发说明
+
+请参考 [开发说明](https://github.com/janpoem/react-monaco/blob/main/docs/DEVEL_GUIDE.md)
 
 ## 机制简介
 

@@ -110,6 +110,12 @@ const config = {
 
 可通过 `txConfig('baseUrl')` 来取得当前的有效值。
 
+
+## 开发说明
+
+请参考 [开发说明](https://github.com/janpoem/react-monaco/blob/main/docs/DEVEL_GUIDE.md)
+
+
 ## 类型说明
 
 ```ts
