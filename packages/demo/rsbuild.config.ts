@@ -1,6 +1,5 @@
 import { defineConfig, rspack } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
-import pkg from './package.json';
 
 export default defineConfig({
   tools: {
@@ -20,7 +19,37 @@ export default defineConfig({
     title: '@react-monaco/core demo development on rsbuild',
     template: './src/index.html',
   },
+  source: {
+    entry: {
+      main: './src/index.tsx',
+    },
+  },
   output: {
-    assetPrefix: `/react-monaco/${pkg.version}`,
+    cleanDistPath: true,
+    distPath: {
+      root: 'dist',
+      js: 'js',
+      css: 'css',
+    },
+    filename: {
+      js: '[name].js',
+      css: '[name].css',
+    },
+    assetPrefix: '/react-monaco-demo',
+  },
+  performance: {
+    chunkSplit: {
+      strategy: 'custom',
+      splitChunks: {
+        cacheGroups: {
+          modules: {
+            test: /node_modules[\\/]/,
+            name: 'modules',
+            chunks: 'all',
+            priority: -10,
+          },
+        },
+      },
+    },
   },
 });

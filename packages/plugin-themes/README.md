@@ -13,7 +13,7 @@ React Monaco Editor 的主题管理插件。
 2. 外部远程 json 声明
 3. 基于 cdn 仓库（或者自己设定 baseUrl）
 
-目前 `@react-monaco/asset` 包含的默认主题如下：
+目前 `@react-monaco/assets` 包含的默认主题如下：
 
 - `atom-material-theme`
 - `atom-one-light`
@@ -26,10 +26,6 @@ React Monaco Editor 的主题管理插件。
 如需自行转换 vscode 的主题，可通过 `@react-monaco/core` 在线演示提供的 [**Theme Converter**](https://gitee.com/link?target=https%3A%2F%2Fstatic.kephp.com%2Freact-monaco%2F0.1.5%2Findex.html)：
 
 ![react-monaco-0.1.4-4](https://doc-assets.janpoem.workers.dev/images/react-monaco-0.1.4-4.png)
-
-
-
-
 
 ## 使用说明
 

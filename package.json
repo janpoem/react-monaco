@@ -1,7 +1,30 @@
 {
   "name": "@react-monaco/repo",
   "version": "0.0.3",
-  "type": "module",
+  "devDependencies": {
+    "@biomejs/biome": "latest",
+    "@rollup/plugin-commonjs": "^28.0.3",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@semver-sync/sync": "^1.0.3",
+    "@semver-sync/store-github": "^1.0.5",
+    "@types/bun": "latest",
+    "@types/semver": "^7.7.0",
+    "@zenstone/ts-utils": "^0.0.10",
+    "ansi-colors": "^4.1.3",
+    "dayjs": "^1.11.13",
+    "glob": "^11.0.1",
+    "monaco-editor": "^0.52.2",
+    "rollup": "^4.37.0",
+    "rollup-plugin-dts": "^6.2.1",
+    "rollup-plugin-swc3": "^0.12.1",
+    "semver": "^7.7.1",
+    "typescript": "^5.8.2"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "private": true,
   "scripts": {
     "exports-tm": "bun scripts/exports-vscode-tm.ts --watch",
     "format-asset-json": "bun scripts/format-assets-json.ts",
@@ -9,29 +32,6 @@
     "dev": "bun -F './packages/*' dev",
     "pub": "bun -F './packages/*' pub"
   },
-  "dependencies": {},
-  "devDependencies": {
-    "typescript": "^5.8.2",
-    "@types/bun": "latest",
-    "@biomejs/biome": "latest",
-    "rollup": "^4.37.0",
-    "rollup-plugin-swc3": "^0.12.1",
-    "rollup-plugin-dts": "^6.2.1",
-    "@rollup/plugin-commonjs": "^28.0.3",
-    "@rollup/plugin-node-resolve": "^16.0.1",
-    "@rollup/plugin-json": "^6.1.0",
-    "glob": "^11.0.1",
-    "dayjs": "^1.11.13",
-    "ansi-colors": "^4.1.3",
-    "@zenstone/ts-utils": "^0.0.10",
-    "@semver-sync/sync": "^1.0.1",
-    "semver": "^7.7.1",
-    "@types/semver": "^7.7.0",
-    "monaco-editor": "^0.52.2"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
-  },
-  "private": true,
+  "type": "module",
   "workspaces": ["packages/*"]
 }

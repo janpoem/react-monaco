@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>@react-monaco/core demo development on rsbuild</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    (() => {
+      const baseUrl = `${location.protocol}//static.kephp.com/react-monaco-demo/`;
+      const storeKey = 'lastUpdatedAt';
+
+      const mount = (assets, updatedAt) => {
+        if (assets == null || !Array.isArray(assets) || assets.length <= 0) return;
+        const head = document.head;
+        for (const asset of assets) {
+          try {
+            const url = new URL(asset.url, baseUrl);
+            if (asset.type === 'js') {
+              const tag = document.createElement('script');
+              tag.setAttribute('src', url.toString());
+              tag.setAttribute('defer', '');
+              head.append(tag);
+            } else if (asset.type === 'css') {
+              const tag = document.createElement('link');
+              tag.setAttribute('href', url.toString());
+              tag.setAttribute('rel', 'stylesheet');
+              head.append(tag);
+            }
+          } catch (err) {}
+        }
+        localStorage.setItem(storeKey, updatedAt);
+      };
+
+      const loadManifest = () => {
+        const lastUpdatedAt = localStorage.getItem(storeKey);
+        const url = `${baseUrl}manifest.json?r=${lastUpdatedAt || Date.now()}`;
+        fetch(url)
+          .then((data) => data.json())
+          .then(({ assets, updatedAt }) => mount(assets || [], updatedAt ?? 0))
+          .catch(console.error);
+      };
+
+      loadManifest();
+    })();
+  </script>
+<body>
+<div id="root"></div>
+</body>
+</html>
