@@ -99,16 +99,17 @@ const filterTmCodeSet: TextmateFilterCodeSetCallback = (
 目前内部预设为：
 
 ```ts
-const config = {
-  onigurumaWasmUrl: 'https://cdn.jsdelivr.net/npm/vscode-oniguruma/release/onig.wasm',
-  baseUrl: 'https://cdn.jsdelivr.net/npm/@react-monaco/assets/assets/tm/',
-  languages: '....',
-};
+export const [setupTextmate, tmConfig] = makeConfigurable({
+  onigurumaWasmUrl: repoUrlOf(monacoConfig('repo'), wasmUrl),
+  baseUrl: monacoAssetsOf('tm/'),
+  languages:
+    ';yaml;yaml-embedded;...省略', // 添加一个 language  ，使用 ;languange; 的格式
+});
 ```
 
 可使用 `setupTextmate` 来重新配置。
 
-可通过 `txConfig('baseUrl')` 来取得当前的有效值。
+可通过 `tmConfig('baseUrl')` 来取得当前的有效值。
 
 
 ## 开发说明
