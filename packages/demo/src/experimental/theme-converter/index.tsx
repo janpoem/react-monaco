@@ -13,6 +13,7 @@ import {
   styled,
   TextField,
 } from '@mui/material';
+import type { MonacoCustomTheme } from '@react-monaco/core';
 import { isInferObj } from '@zenstone/ts-utils/object';
 import { notEmptyStr } from '@zenstone/ts-utils/string';
 import * as changeCase from 'change-case';
@@ -20,7 +21,6 @@ import type { ValidationError } from 'jsoneditor';
 import compare from 'just-compare';
 import { useRef, useState } from 'react';
 import { useIsomorphicLayoutEffect, useLocalStorage } from 'usehooks-ts';
-import type { MonacoCustomTheme } from '../../../../../src/monaco';
 import JSONEditor from '../../components/JSONEditor';
 
 type MaybeVsTheme = IVSCodeTheme & {

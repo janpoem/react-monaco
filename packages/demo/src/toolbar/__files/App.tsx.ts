@@ -10,6 +10,8 @@ import {
   Button,
   CssBaseline,
   LinearProgress,
+  MenuItem,
+  Select,
   ThemeProvider,
 } from '@mui/material';
 import {
@@ -22,6 +24,7 @@ import {
 } from '@react-monaco/core';
 import { LocaleInjection } from '@react-monaco/plugin-locale';
 import {
+  type TextmateActiveLanguage,
   type TextmateCodeSet,
   type TextmateFilterCodeSetCallback,
   TextmateInjection,
@@ -30,15 +33,13 @@ import {
 } from '@react-monaco/plugin-textmate';
 import { createThemesPlugin } from '@react-monaco/plugin-themes';
 import { useMemo, useRef, useState } from 'react';
-import { useLocalStorage } from 'usehooks-ts';
-import type { TextmateActiveLanguage } from '../../../src/plugins/textmate';
+import { useIsomorphicLayoutEffect, useLocalStorage } from 'usehooks-ts';
 import ThemeConverter from './experimental/theme-converter';
 import { TypescriptInjection } from './experimental/typescript';
 import { assetsOf } from './presets';
 import { createTheme } from './theme';
-import githubLight from './thtmes/github-light';
+import githubLight from './themes/github-light';
 import {
-  FileSelect,
   FileSelectOptions,
   FootBar,
   LanguageDisplay,
@@ -100,8 +101,11 @@ const { themes, ThemesInjection } = createThemesPlugin({
   // baseUrl: assetsOf('themes'),
 });
 
+const hashThemeConverter = '#theme-converter';
+
 const App = () => {
   const ref = useRef<MonacoCodeEditorRef | null>(null);
+  const filesRef = useRef(FileSelectOptions);
 
   const [sampleData, storeSample] = useLocalStorage<SampleStorageData>(
     'monaco-sample-data',
@@ -110,13 +114,6 @@ const App = () => {
   const { locale, theme, filename, customOptions } = sampleData;
 
   const [nextTheme, setNextTheme] = useState<NextTheme>({ loading: false });
-
-  const input = useMemo(
-    () =>
-      FileSelectOptions.find((it) => it.filename === filename) ??
-      FileSelectOptions[0],
-    [filename],
-  );
 
   const [options, muiTheme, themeColors] = useMemo(() => {
     const { name, colors, isDark } = revertMonacoThemeSkeleton(theme);
@@ -137,12 +134,35 @@ const App = () => {
   const update = (frag: Partial<SampleStorageData>) =>
     storeSample((prev) => ({ ...prev, ...frag }));
 
+  const currentFile = useMemo(() => {
+    let item = filesRef.current.find((it) => it.filename === filename);
+    if (item == null) {
+      item = filesRef.current[0];
+    }
+    return item;
+  }, [filename]);
+
+  useIsomorphicLayoutEffect(() => {
+    const hashChange = () => {
+      setOpenThemeConverter(location.hash === hashThemeConverter);
+    };
+    hashChange();
+    window.addEventListener('hashchange', hashChange);
+    return () => {
+      location.hash = '';
+      window.removeEventListener('hashchange', hashChange);
+    };
+  }, []);
+
   return (
     <ThemeProvider theme={muiTheme}>
       <CssBaseline />
       <ThemeConverter.Dialog
         open={openThemeConverter}
-        onClose={() => setOpenThemeConverter(false)}
+        onClose={() => {
+          location.hash = '';
+          // setOpenThemeConverter(false);
+        }}
       />
       <EditOptions
         open={openEditOptions}
@@ -190,10 +210,18 @@ const App = () => {
             value={locale}
             onChange={(locale) => update({ locale })}
           />
-          <FileSelect
-            value={input}
-            onChange={(it) => update({ filename: it.filename })}
-          />
+          <Select
+            value={currentFile.filename}
+            onChange={(ev) => {
+              update({ filename: ev.target.value });
+            }}
+          >
+            {filesRef.current.map((it) => (
+              <MenuItem key={it.filename} value={it.filename}>
+                {it.filename}
+              </MenuItem>
+            ))}
+          </Select>
           <ThemeSelect
             value={options.theme}
             themes={themes}
@@ -201,7 +229,12 @@ const App = () => {
             onChange={(name) => setNextTheme({ name, loading: true })}
           />
           <Box display={'flex'} sx={{ ml: 'auto' }} gap={'4px'}>
-            <Button size={'medium'} onClick={() => setOpenThemeConverter(true)}>
+            <Button
+              size={'medium'}
+              onClick={() => {
+                location.hash = hashThemeConverter;
+              }}
+            >
               Theme Converter
             </Button>
             <Button
@@ -214,9 +247,18 @@ const App = () => {
         </TopBar>
         <MonacoCodeEditor
           ref={ref}
-          input={input}
+          debug
+          input={currentFile}
           className={cssScrollBar}
           options={options}
+          onCreateModel={({ input, model }) => {
+            const it = filesRef.current.find(
+              (it) => it.filename === input.filename,
+            );
+            if (it) {
+              it.model = model;
+            }
+          }}
         />
         <FootBar>
           <LanguageDisplay

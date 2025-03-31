@@ -19,11 +19,14 @@ export default defineConfig({
     title: '@react-monaco/core demo development on rsbuild',
     template: './src/index.html',
   },
-  source: {
-    entry: {
-      main: './src/index.tsx',
-    },
-  },
+  source:
+    process.env.NODE_ENV === 'production'
+      ? {
+          entry: {
+            main: './src/index.tsx',
+          },
+        }
+      : undefined,
   output: {
     cleanDistPath: true,
     distPath: {

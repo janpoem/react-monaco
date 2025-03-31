@@ -7,7 +7,7 @@ Monaco Editor 在 React 上的实现，非常轻量、核心化，易于分层�
 所有 `@react-monaco/core` 或 `@react-monaco/plugin-*`
 ，皆使用外部资源加载的方式，本身的核心代码非常少，并提供多种配置方式。
 
-[Demo 演示](https://static.kephp.com/react-monaco/0.1.5/index.html) - 支持 model 复用模式，全 debug 开启
+[Demo 演示](https://static.kephp.com/react-monaco-demo/index.html) - 支持 model 复用模式，全 debug 开启
 
 ![react-monaco-0.1.4-5](https://doc-assets.janpoem.workers.dev/images/react-monaco-0.1.4-5.png)
 

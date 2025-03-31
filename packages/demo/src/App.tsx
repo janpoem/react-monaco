@@ -28,7 +28,7 @@ import {
 } from '@react-monaco/plugin-textmate';
 import { createThemesPlugin } from '@react-monaco/plugin-themes';
 import { useMemo, useRef, useState } from 'react';
-import { useLocalStorage } from 'usehooks-ts';
+import { useIsomorphicLayoutEffect, useLocalStorage } from 'usehooks-ts';
 import ThemeConverter from './experimental/theme-converter';
 import { TypescriptInjection } from './experimental/typescript';
 import { assetsOf } from './presets';
@@ -96,6 +96,8 @@ const { themes, ThemesInjection } = createThemesPlugin({
   // baseUrl: assetsOf('themes'),
 });
 
+const hashThemeConverter = '#theme-converter';
+
 const App = () => {
   const ref = useRef<MonacoCodeEditorRef | null>(null);
   const filesRef = useRef(FileSelectOptions);
@@ -135,12 +137,27 @@ const App = () => {
     return item;
   }, [filename]);
 
+  useIsomorphicLayoutEffect(() => {
+    const hashChange = () => {
+      setOpenThemeConverter(location.hash === hashThemeConverter);
+    };
+    hashChange();
+    window.addEventListener('hashchange', hashChange);
+    return () => {
+      location.hash = '';
+      window.removeEventListener('hashchange', hashChange);
+    };
+  }, []);
+
   return (
     <ThemeProvider theme={muiTheme}>
       <CssBaseline />
       <ThemeConverter.Dialog
         open={openThemeConverter}
-        onClose={() => setOpenThemeConverter(false)}
+        onClose={() => {
+          location.hash = '';
+          // setOpenThemeConverter(false);
+        }}
       />
       <EditOptions
         open={openEditOptions}
@@ -207,7 +224,12 @@ const App = () => {
             onChange={(name) => setNextTheme({ name, loading: true })}
           />
           <Box display={'flex'} sx={{ ml: 'auto' }} gap={'4px'}>
-            <Button size={'medium'} onClick={() => setOpenThemeConverter(true)}>
+            <Button
+              size={'medium'}
+              onClick={() => {
+                location.hash = hashThemeConverter;
+              }}
+            >
               Theme Converter
             </Button>
             <Button
