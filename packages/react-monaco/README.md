@@ -414,18 +414,25 @@ export type PresetStyleVars = {
 };
 
 export type MonacoCodeEditorProps = {
+  // 输入内容
   input: MonacoCodeInput;
-  // 编辑器参数
+  // 是否开启 debug 输出信息
+  debug?: boolean;
+  // 编辑器选项
   options?: Partial<
     Omit<monaco.editor.IStandaloneEditorConstructionOptions, 'value' | 'model'>
   >;
   className?: string;
   style?: CSSProperties;
-  beforeModel?: (params: MonacoModelPrepareParams) => void;
-  onModel?: (params: MonacoModelCreateParams) => void;
-  onChange?: (params: MonacoModelChangeParams) => void;
-  beforeMount?: (params: MonacoEditorPrepareParams) => void;
-  onMount?: (params: MonacoEditorMountParams) => void;
+  // 相关回调事件
+  onPrepareModel?: (params: MonacoModelPrepareParams) => void;
+  onCreateModel?: (params: MonacoModelCreateParams) => void;
+  onChangeModel?: (params: MonacoModelChangeParams) => void;
+  onDisposeModel?: (params: MonacoModelDisposeParams) => void;
+  onChangeInput?: (params: MonacoInputChangeParams) => void;
+  onPrepareEditor?: (params: MonacoEditorPrepareParams) => void;
+  onMountEditor?: (params: MonacoEditorMountParams) => void;
+  onDisposeEditor?: (params: MonacoEditorDisposeParams) => void;
   onFocus?: (params: MonacoEditorFocusAndBlurParams) => void;
   onBlur?: (params: MonacoEditorFocusAndBlurParams) => void;
 };
@@ -437,10 +444,178 @@ export type MonacoFileCodeInput = {
   source?: string;
   // uri ，部分代码文件，必须指定  uri 才能正确高亮
   uri?: string;
+  // 可选 model
+  model?: monaco.editor.ITextModel;
 };
 
 export type MonacoCodeInput = MonacoFileCodeInput;
 ```
+
+### 预定义的 className
+
+
+
+```ts
+export const presetCls = {
+  container: 'MonacoContainer',
+  errContainer: 'MonacoErr',
+  errDisplay: 'MonacoErrDisplay',
+  errScope: 'MonacoErrScope',
+  errMsg: 'MonacoErrMsg',
+  loaderContainer: 'MonacoLoader',
+  loaderBox: 'MonacoLoaderBox',
+  loaderText: 'MonacoLoaderText',
+  progressBar: 'MonacoProgressBar',
+  codeEditor: 'MonacoCodeEditor',
+} as const;
+```
+
+### EventEmitter 的事件定义
+
+`MonacoProviderProps['events']` ，允许输入三种事件的定义
+
+- `EventEmitter<MonacoEventsDefinition>` - 自定义的 EventEmitter 实现实体，目前只要求 EventEmitter 实现 `emit`, `on`, `off` 三个方法，就符合使用
+- `EventsCallbacks<MonacoEventsDefinition>` - 事件声明函数包，函数可单个函数，可函数数组
+- `EventsDelegator<MonacoEventsDefinition>` - 事件委托者，便于基于 Class 实例的方式，去持有事件的状态，主要针对插件开发中使用的机制。
+
+具体的类型抽象定义，参考如下：
+
+```ts
+export type _MaybePromise<T> = T | Promise<T>;
+
+/**
+ * 事件定义，实际上是声明一个事件和事件参数的 record
+ */
+export type EventsDefinition = Record<PropertyKey, any>;
+
+/**
+ * EventEmitter 的抽象描述
+ */
+export interface EventEmitter<E extends EventsDefinition = EventsDefinition> {
+  on: <N extends keyof E>(
+    name: N,
+    callback: (params: E[N]) => _MaybePromise<void>,
+  ) => void;
+
+  off: <N extends keyof E>(
+    name: N,
+    callback: (params: E[N]) => _MaybePromise<void>,
+  ) => void;
+
+  emit: <N extends keyof E, P = E[N]>(
+    name: N,
+    params: P,
+  ) => _MaybePromise<void>;
+}
+
+/**
+ * 事件回调函数声明
+ */
+export type EventCallbackDeclaration<T> =
+  | ((params: T) => _MaybePromise<void>)
+  | ((params: T) => _MaybePromise<void>[]);
+
+export type EventsCallbacks<E extends EventsDefinition = EventsDefinition> =
+  Partial<{
+    [Key in keyof E]: EventCallbackDeclaration<E[Key]>;
+  }>;
+
+/**
+ * 事件委托者
+ * 
+ * - inject - 为注入事件，为 emitter 批量绑定事件的入口函数
+ * - eject - 为弹出事件，为 emitter 批量取消事件绑定
+ */
+export interface EventsDelegator<
+  E extends EventsDefinition = EventsDefinition,
+> {
+  inject(emitter?: EventEmitter<E>): void;
+  eject(emitter?: EventEmitter<E>): void;
+}
+
+/**
+ * 有效的事件输入类型
+ */
+export type EventsInput<E extends EventsDefinition = EventsDefinition> =
+  | EventEmitter<E>
+  | EventsCallbacks<E>
+  | EventsDelegator<E>;
+```
+
+为了便于扩展开发，额外定义了一个抽象类 [BaseEventsDelegator.ts](src/utils/BaseEventsDelegator.ts)，使用时的基本要求为：
+
+```ts
+import {
+  BaseEventsDelegator,
+  type MonacoEventsDefinition,
+  type EventsDelegatorOptions,
+} from '@react-monaco/core';
+
+type YourPluginProps = {};
+
+class YourEventsDelegator extends BaseEventsDelegator<MonacoEventsDefinition> {
+  // 指定调试器输出的前缀格式
+  scopeName = ['YourPlugin', 'color: red'];
+
+  constructor(
+    // 插件参数，一般通过插件组件传进来
+    public readonly props: YourPluginProps,
+    // 事件委托者配置参数，主要用于前置开启 debug
+    opts?: Partial<EventsDelegatorOptions>
+  ) {
+    super(opts);
+    this.debug('constructor with', props);
+  }
+}
+
+```
+
+### 全部的事件声明
+
+目前包括两部分事件声明 `RemoteLoaderEventsDefinition` 和  `MonacoEventsDefinition`
+
+```ts
+// use-remote-loader 的事件
+/**
+ * RemoteLoader 事件定义
+ *
+ * 这里为了便于和其他的事件进行区分，所以事件名采用长一点的命名
+ *
+ * 特别注意，mount / load 事件进行了调整
+ *
+ * - mountAssets 仍处于 preload 的流程里，所以回调参数里取回 {@link DownloadQueue}，已挂载的内容，和结果集
+ * - loadAssets 则已经脱离 preload 流程
+ *
+ * 所以需要根据实际情况，取决定取用哪个事件
+ */
+export type RemoteLoaderEventsDefinition<Query = object> = {
+  prepareAssets: RemotePrepareAssetsParams<Query>;
+  preloadAssets: RemotePreloadAssetsParams<Query>;
+  willMountAssets: RemoteWillMountAssetsParams<Query>;
+  mountAssets: RemoteOnMountAssetsParams<Query>;
+  loadAssets: RemoteOnLoadAssetsParams<Query>;
+  downloadAsset: RemoteOnDownloadAssetParams<Query>;
+  asset: RemoteOnHandleAssetParams<Query>;
+  [K: `asset:${string}`]: RemoteOnHandleAssetParams<Query>;
+};
+
+export type MonacoEventsDefinition = RemoteLoaderEventsDefinition & {
+  mounting: MonacoMountingParams;
+  prepareModel: MonacoModelPrepareParams;
+  createModel: MonacoModelCreateParams;
+  changeModel: MonacoModelChangeParams;
+  disposeModel: MonacoModelDisposeParams;
+  changeInput: MonacoInputChangeParams;
+  prepareEditor: MonacoEditorPrepareParams;
+  /**
+   * Editor 挂载成功事件
+   */
+  mountEditor: MonacoEditorMountParams;
+  disposeEditor: MonacoEditorDisposeParams;
+};
+```
+
+具体的事件参数，请翻阅代码。
 
 ## 更新说明
 
