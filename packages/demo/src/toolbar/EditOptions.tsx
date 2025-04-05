@@ -1,6 +1,6 @@
 import { Box, Button, Drawer, Link, Tooltip } from '@mui/material';
 import type { MonacoCodeEditorProps } from '@react-monaco/core';
-import { isInferObj } from '@zenstone/ts-utils/object';
+import { isInferObj } from '@zenstone/ts-utils';
 import compare from 'just-compare';
 import { useRef, useState } from 'react';
 import { useIsomorphicLayoutEffect, useTimeout } from 'usehooks-ts';

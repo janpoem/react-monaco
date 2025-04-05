@@ -1,6 +1,5 @@
 import { Box, LinearProgress, styled } from '@mui/material';
-import { errMsg } from '@zenstone/ts-utils/error';
-import { toNumber } from '@zenstone/ts-utils/number';
+import { errMsg, toNumber } from '@zenstone/ts-utils';
 import useRemoteLoader from '@zenstone/use-remote-loader';
 import type { JSONEditorOptions } from 'jsoneditor';
 import compare from 'just-compare';

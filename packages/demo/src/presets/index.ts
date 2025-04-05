@@ -1,4 +1,4 @@
-import { purgeHttpPath } from '@zenstone/ts-utils/path';
+import { purgeHttpPath } from '@zenstone/ts-utils';
 
 const cdnAssetsBaseUrl =
   'https://cdn.jsdelivr.net/npm/@react-monaco/assets/assets/';

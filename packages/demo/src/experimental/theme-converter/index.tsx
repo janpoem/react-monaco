@@ -14,8 +14,7 @@ import {
   TextField,
 } from '@mui/material';
 import type { MonacoCustomTheme } from '@react-monaco/core';
-import { isInferObj } from '@zenstone/ts-utils/object';
-import { notEmptyStr } from '@zenstone/ts-utils/string';
+import { isInferObj, notEmptyStr } from '@zenstone/ts-utils';
 import * as changeCase from 'change-case';
 import type { ValidationError } from 'jsoneditor';
 import compare from 'just-compare';

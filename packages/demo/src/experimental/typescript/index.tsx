@@ -72,6 +72,16 @@ export class TypescriptEventsDelegator extends BaseEventsDelegator<MonacoEventsD
   mounting = (params: MonacoEventsDefinition['mounting']) => {
     (this.props.mounting || tsConfig('mounting'))(params);
     this.isDebug && console.log('Typescript: mounting');
+    const { monaco } = params;
+
+    monaco.languages.typescript.typescriptDefaults.addExtraLib(
+      `declare module 'test/abc' {
+export function test():  string {
+  return  'abc';
+}
+}`,
+      `file:///test/abc.d.ts`,
+    );
   };
 
   prepareModel = ({

@@ -21,13 +21,7 @@ const rmdir = (dir: string, enable = true) => {
   };
 };
 
-const external = [
-  'react',
-  'just-compare',
-  '@zenstone/ts-utils',
-  '@zenstone/ts-utils/fetch-download',
-  '@zenstone/ts-utils/remote',
-];
+const external = ['react', 'just-compare', '@zenstone/ts-utils'];
 const dtsExternal = external;
 const entry = 'src/index.ts';
 

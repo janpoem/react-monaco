@@ -6,7 +6,6 @@
     "noEmit": true,
     "skipLibCheck": true,
     "useDefineForClassFields": true,
-
     /* modules */
     "module": "ESNext",
     "isolatedModules": true,
@@ -14,12 +13,11 @@
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": false,
     "esModuleInterop": true,
-
     /* type checking */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true
   },
   "include": ["src"],
-  "exclude": ["node_modules", "__files", "src/plugins/biome/**/*"]
+  "exclude": ["node_modules"]
 }

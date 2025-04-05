@@ -1,4 +1,4 @@
-import { notEmptyStr } from '@zenstone/ts-utils/string';
+import { notEmptyStr } from '@zenstone/ts-utils';
 import { glob } from 'glob';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, resolve } from 'node:path';

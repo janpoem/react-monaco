@@ -10,7 +10,7 @@
     "rsbuild": "rsbuild build",
     "preview": "rsbuild preview",
     "sync": "bun sync.ts",
-    "build": "bun run rsbuild && bun run sync"
+    "release": "bun run rsbuild && bun run sync"
   },
   "repository": {
     "type": "git",
@@ -26,13 +26,13 @@
     "@react-monaco/plugin-themes": "workspace:*",
     "@zenstone/preset-provider": "workspace:*",
     "@zenstone/use-remote-loader": "workspace:*",
+    "@zenstone/ts-utils": "^0.0.12",
     "@emotion/css": "^11.13.5",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@mui/material": "^7.0.0",
     "@mui/icons-material": "^7.0.0",
     "usehooks-ts": "^3.1.1",
-    "@zenstone/ts-utils": "^0.0.10",
     "just-compare": "^2.3.0",
     "@estruyf/vscode-theme-converter": "^1.1.0",
     "change-case": "^5.4.4"

@@ -1,4 +1,3 @@
-import { notEmptyStr } from '@zenstone/ts-utils';
 import {
   type ComponentProps,
   type ComponentType,
@@ -104,7 +103,7 @@ export const usePresetProviderInit = <
       // @ts-ignore
       params: Params = {},
     ) => {
-      if (notEmptyStr(text)) return text;
+      if (text) return text;
       return getText(key, params);
     },
     [getText],

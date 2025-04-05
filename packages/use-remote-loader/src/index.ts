@@ -1,10 +1,11 @@
-import { notEmptyStr } from '@zenstone/ts-utils';
-import { DownloadQueue, DownloadTask } from '@zenstone/ts-utils/fetch-download';
 import {
+  DownloadQueue,
+  DownloadTask,
   mountRemote,
   type MountRemoteResult,
+  notEmptyStr,
   unmountRemote,
-} from '@zenstone/ts-utils/remote';
+} from '@zenstone/ts-utils';
 import { useRef, useState } from 'react';
 import compare from './compare';
 import { useInterval, useIsomorphicLayoutEffect } from './usehooks-ts';
