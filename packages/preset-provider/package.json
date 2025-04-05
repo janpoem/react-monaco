@@ -1,6 +1,6 @@
 {
   "name": "@zenstone/preset-provider",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A React preset environment context provider. Mainly provides overload interception for Components and Texts.",
   "author": "Jiankai Zeng <janpoem@163.com>",
   "license": "MIT",
