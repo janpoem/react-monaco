@@ -1,6 +1,5 @@
 import {
   BaseEventsDelegator,
-  type EventsDelegatorOptions,
   type MonacoEventsDefinition,
 } from '@react-monaco/core';
 import {
@@ -23,7 +22,10 @@ import type {
   TextmateScope,
 } from './types';
 
-export class TextmateEventsDelegator extends BaseEventsDelegator<MonacoEventsDefinition> {
+export class TextmateEventsDelegator extends BaseEventsDelegator<
+  MonacoEventsDefinition,
+  TextmateInjectionProps
+> {
   scopeName = ['Textmate', 'color: orange'];
 
   wasmKey = 'wasm/onigasm';
@@ -38,11 +40,8 @@ export class TextmateEventsDelegator extends BaseEventsDelegator<MonacoEventsDef
 
   vsOnigurumaLib?: Promise<IOnigLib>;
 
-  constructor(
-    public readonly props: TextmateInjectionProps,
-    opts?: Partial<EventsDelegatorOptions>,
-  ) {
-    super(opts);
+  constructor(props: TextmateInjectionProps) {
+    super(props);
     this.register('prepareAssets')
       .register('onAssetVSCodeWasm', `asset:${this.wasmKey}`)
       .register('mounting')
@@ -52,11 +51,11 @@ export class TextmateEventsDelegator extends BaseEventsDelegator<MonacoEventsDef
   }
 
   get baseUrl() {
-    return this.props.baseUrl || tmConfig('baseUrl');
+    return this.options.baseUrl || tmConfig('baseUrl');
   }
 
   get onigurumaWasmUrl() {
-    return this.props.onigurumaWasmUrl || tmConfig('onigurumaWasmUrl');
+    return this.options.onigurumaWasmUrl || tmConfig('onigurumaWasmUrl');
   }
 
   get wasmAsset() {
@@ -107,7 +106,7 @@ export class TextmateEventsDelegator extends BaseEventsDelegator<MonacoEventsDef
   };
 
   prepareModel = (params: MonacoEventsDefinition['prepareModel']) => {
-    const { provider: providerCallback, onChange } = this.props;
+    const { provider: providerCallback } = this.options;
     const { language, extname } = params;
     let languageId: string | undefined;
     let provider: TextmateProvider | undefined;
@@ -138,7 +137,7 @@ export class TextmateEventsDelegator extends BaseEventsDelegator<MonacoEventsDef
     params: MonacoEventsDefinition['prepareModel'],
     provider?: TextmateProvider,
   ): TextmateCodeSet | undefined => {
-    const { onChange, filter } = this.props;
+    const { onChange, filter } = this.options;
     const timestamp = Date.now();
     const { monaco, language } = params;
     let isActive = false;

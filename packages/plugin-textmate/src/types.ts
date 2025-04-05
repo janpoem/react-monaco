@@ -1,5 +1,8 @@
 /// <reference types="monaco-editor/monaco.d.ts" />
-import type { MonacoEventsDefinition } from '@react-monaco/core';
+import type {
+  EventsDelegatorOptions,
+  MonacoEventsDefinition,
+} from '@react-monaco/core';
 
 export type TextmateActiveLanguage = {
   isActive: boolean;
@@ -23,13 +26,12 @@ export type TextmateFilterCodeSetCallback = (
   code: TextmateCodeSet,
 ) => TextmateCodeSet;
 
-export type TextmateInjectionProps = {
+export type TextmateInjectionProps = EventsDelegatorOptions & {
   onigurumaWasmUrl?: string | URL;
   provider?: TextmateProviderCallback;
   baseUrl?: string | URL;
   onChange?: (state: TextmateActiveLanguage) => void;
   filter?: TextmateFilterCodeSetCallback;
-  debug?: boolean;
 };
 
 export type TextmateScope = {

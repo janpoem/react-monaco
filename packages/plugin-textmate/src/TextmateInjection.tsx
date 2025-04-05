@@ -10,9 +10,9 @@ export const TextmateInjection = (props: TextmateInjectionProps) => {
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useLayoutEffect(() => {
     try {
-      delegatorRef.current = new TextmateEventsDelegator(props, {
+      delegatorRef.current = new TextmateEventsDelegator({
+        ...props,
         mounting: extendThemes,
-        debug: props.debug,
       });
       delegatorRef.current.inject(emitterRef.current);
     } catch (err) {
