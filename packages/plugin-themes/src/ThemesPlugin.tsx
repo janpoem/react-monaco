@@ -27,9 +27,7 @@ export const createThemesPlugin = (
     // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
     useLayoutEffect(() => {
       try {
-        delegatorRef.current = new ThemesEventsDelegator(settings, props, {
-          debug: props.debug,
-        });
+        delegatorRef.current = new ThemesEventsDelegator(settings, props);
         delegatorRef.current.inject(emitterRef.current);
       } catch (err) {
         setError(err);

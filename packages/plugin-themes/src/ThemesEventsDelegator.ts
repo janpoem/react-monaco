@@ -1,6 +1,5 @@
 import {
   BaseEventsDelegator,
-  type EventsDelegatorOptions,
   isMonacoBuiltinTheme,
   isMonacoCustomTheme,
   type MonacoCustomTheme,
@@ -16,7 +15,10 @@ import type {
 } from './types';
 
 // 这个代码有待优化，做得太心急了
-export class ThemesEventsDelegator extends BaseEventsDelegator<MonacoEventsDefinition> {
+export class ThemesEventsDelegator extends BaseEventsDelegator<
+  MonacoEventsDefinition,
+  ThemeInjectionProps
+> {
   scopeName = ['Themes', 'color: lightgreen'];
 
   assetKey?: string;
@@ -31,10 +33,9 @@ export class ThemesEventsDelegator extends BaseEventsDelegator<MonacoEventsDefin
 
   constructor(
     public readonly settings: CreateThemesPluginOptions,
-    public readonly props: ThemeInjectionProps,
-    opts?: Partial<EventsDelegatorOptions>,
+    props: ThemeInjectionProps,
   ) {
-    super(opts);
+    super(props);
     this.setTheme(props.theme);
     this.register('prepareAssets').register('asset').register('mounting');
     this.debug(`constructor with theme '${props.theme}'`);
@@ -98,10 +99,10 @@ export class ThemesEventsDelegator extends BaseEventsDelegator<MonacoEventsDefin
           throw new Error(`'${this.assetKey}' not a valid monaco theme data`);
         }
         this.loadedThemes[this.themeName] = theme;
-        this.props.onLoad?.({ isSuccess: true, theme });
+        this.options.onLoad?.({ isSuccess: true, theme });
       } catch (err) {
         this.debug(`parse '${this.assetKey}' JSON error`, err);
-        this.props.onLoad?.({ isSuccess: false });
+        this.options.onLoad?.({ isSuccess: false });
       }
       handle();
     }
@@ -115,7 +116,7 @@ export class ThemesEventsDelegator extends BaseEventsDelegator<MonacoEventsDefin
       const theme = themeDec?.theme ?? this.loadedThemes[this.themeName];
       if (theme) {
         this.defineTheme(theme);
-        this.props.onLoad?.({
+        this.options.onLoad?.({
           isSuccess: true,
           theme: theme,
         });
@@ -135,7 +136,7 @@ export class ThemesEventsDelegator extends BaseEventsDelegator<MonacoEventsDefin
 
       if (name && isMonacoBuiltinTheme(name)) {
         this.debug(`'${name}' is monaco builtin theme`);
-        this.props.onLoad?.({
+        this.options.onLoad?.({
           isSuccess: true,
           theme: MonacoPresetThemes[name],
           isPreload: true,
@@ -149,7 +150,7 @@ export class ThemesEventsDelegator extends BaseEventsDelegator<MonacoEventsDefin
       if (loadedTheme != null) {
         this.debug(`'${name}' is loaded`);
         this.defineTheme(loadedTheme);
-        this.props.onLoad?.({
+        this.options.onLoad?.({
           isSuccess: true,
           theme: loadedTheme,
           isPreload: true,
@@ -170,10 +171,10 @@ export class ThemesEventsDelegator extends BaseEventsDelegator<MonacoEventsDefin
 
       this.loadedThemes[themeDec.key] = theme;
       this.defineTheme(theme);
-      this.props.onLoad?.({ isSuccess: true, theme, isPreload: true });
+      this.options.onLoad?.({ isSuccess: true, theme, isPreload: true });
     } catch (err) {
       this.debug('preload theme error:', errMsg(err));
-      this.props.onLoad?.({ isSuccess: false, isPreload: true });
+      this.options.onLoad?.({ isSuccess: false, isPreload: true });
     } finally {
       this.loading = undefined;
     }

@@ -33,7 +33,7 @@ export type ThemeOnLoadFailure = {
   isPreload?: boolean;
 };
 
-export type ThemeInjectionProps = {
+export type ThemeInjectionProps = EventsDelegatorOptions & {
   theme?: string;
   debug?: EventsDelegatorOptions['debug'];
   onLoad?: (result: ThemeOnLoadSuccess | ThemeOnLoadFailure) => void;
