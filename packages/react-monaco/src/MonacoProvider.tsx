@@ -17,7 +17,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { useIsomorphicLayoutEffect } from 'usehooks-ts';
+import { useEventCallback, useIsomorphicLayoutEffect } from 'usehooks-ts';
 import { ErrorWrapper } from './components';
 import { MonacoReadyState } from './constants';
 import { MonacoLoader, type MonacoLoaderProps } from './MonacoLoader';
@@ -36,8 +36,9 @@ import {
 import { MonacoPresetThemes } from './themes';
 import type {
   EventEmitter,
-  EventsInput,
+  EventsCallbacks,
   MonacoEventsDefinition,
+  MonacoUpdateLifecycleParams,
 } from './types';
 import {
   isWorkerAsset,
@@ -80,10 +81,15 @@ export type MonacoProviderProps = {
   texts?: Partial<MonacoTexts>;
   components?: Partial<MonacoComponents>;
   loader?: MonacoLoaderProps;
-  events?: EventsInput<MonacoEventsDefinition>;
+  events?:
+    | EventEmitter<MonacoEventsDefinition>
+    | EventsCallbacks<MonacoEventsDefinition>;
   style?: Partial<PresetStyleVars & CSSProperties>;
   className?: string;
   children?: ReactNode;
+  // 增加这两个事件回调，用于调试 next.js context 割裂的问题
+  onInit?: (params: MonacoUpdateLifecycleParams) => void;
+  onUpdateLifecycle?: (params: MonacoUpdateLifecycleParams) => void;
 };
 
 const createReadyState = () => {
@@ -103,6 +109,8 @@ export const MonacoProvider = ({
   style,
   className,
   children,
+  onInit,
+  onUpdateLifecycle,
   ...props
 }: MonacoProviderProps) => {
   const queryRef = useRef(loader?.query);
@@ -113,6 +121,9 @@ export const MonacoProvider = ({
 
   const [lifecycleId, setLifecycleId] = useState(0);
   const lifecycleIdRef = useRef(lifecycleId);
+
+  const onInitFn = useEventCallback(onInit);
+  const onUpdateLifecycleFn = useEventCallback(onUpdateLifecycle);
 
   const container = useMemo(
     () =>
@@ -134,9 +145,32 @@ export const MonacoProvider = ({
     }
   }, [loader?.query]);
 
-  const shouldReload = useCallback(() => {
-    return lifecycleId !== lifecycleIdRef.current;
+  useIsomorphicLayoutEffect(() => {
+    if (lifecycleIdRef.current !== lifecycleId) {
+      onUpdateLifecycleFn?.({
+        lifecycleId,
+        query: queryRef.current,
+        // biome-ignore lint/style/noNonNullAssertion: <explanation>
+        emitter: emitterRef.current!,
+        monaco: monacoRef.current,
+      });
+    }
   }, [lifecycleId]);
+
+  useIsomorphicLayoutEffect(() => {
+    onInitFn?.({
+      lifecycleId: lifecycleIdRef.current,
+      query: queryRef.current,
+      // biome-ignore lint/style/noNonNullAssertion: <explanation>
+      emitter: emitterRef.current!,
+      monaco: monacoRef.current,
+    });
+  }, []);
+
+  const shouldReload = useCallback(
+    () => lifecycleId !== lifecycleIdRef.current,
+    [lifecycleId],
+  );
 
   return (
     <PresetProvider preset={preset}>

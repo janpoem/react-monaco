@@ -106,6 +106,13 @@ export type EventsInput<E extends EventsDefinition = EventsDefinition> =
 ////////////////////////////////////////////////////////////////////////////////
 // Monaco 专属事件定义
 ////////////////////////////////////////////////////////////////////////////////
+export type MonacoUpdateLifecycleParams = {
+  lifecycleId: number;
+  emitter: EventEmitter<MonacoEventsDefinition>;
+  monaco?: typeof monaco;
+  query?: object;
+};
+
 export type MonacoMountingParams = {
   monaco: typeof monaco;
 };

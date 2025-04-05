@@ -25,11 +25,8 @@ export const isEventEmitter = <E extends EventsDefinition = EventsDefinition>(
   isInferObj<EventEmitter<E>>(
     obj,
     (it) =>
-      // Object.hasOwn(it, 'emit') &&
       typeof it.emit === 'function' &&
-      // Object.hasOwn(it, 'on') &&
       typeof it.on === 'function' &&
-      // Object.hasOwn(it, 'off') &&
       typeof it.off === 'function',
   );
 

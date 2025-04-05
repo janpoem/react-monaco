@@ -38,9 +38,9 @@ export abstract class BaseEventsDelegator<
 {
   protected scopeName?: string | string[];
 
-  options: EventsDelegatorOptions = {
+  options: Options = {
     debug: false,
-  };
+  } as Options;
 
   #events: EventsCallbacks<Events> = {};
 
