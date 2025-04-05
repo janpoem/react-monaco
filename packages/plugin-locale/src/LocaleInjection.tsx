@@ -11,7 +11,7 @@ export const LocaleInjection = (props: LocaleInjectionProps) => {
 
   if (delegatorRef.current == null) {
     try {
-      delegatorRef.current = new LocaleEventsDelegator(props, { debug });
+      delegatorRef.current = new LocaleEventsDelegator(props);
       delegatorRef.current.inject(emitterRef.current);
     } catch (err) {
       setError(err);

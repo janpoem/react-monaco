@@ -1,6 +1,6 @@
 {
   "name": "@react-monaco/plugin-locale",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "locale plugin for react monaco editor.",
   "author": "Jiankai Zeng <janpoem@163.com>",
   "license": "MIT",

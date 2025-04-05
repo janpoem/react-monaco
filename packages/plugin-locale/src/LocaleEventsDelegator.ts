@@ -1,6 +1,5 @@
 import {
   BaseEventsDelegator,
-  type EventsDelegatorOptions,
   type MonacoEventsDefinition,
   updateMonacoEnvironment,
 } from '@react-monaco/core';
@@ -15,25 +14,25 @@ declare global {
   }
 }
 
-export class LocaleEventsDelegator extends BaseEventsDelegator<MonacoEventsDefinition> {
+export class LocaleEventsDelegator extends BaseEventsDelegator<
+  MonacoEventsDefinition,
+  LocaleInjectionProps
+> {
   scopeName = 'Locale';
 
   locale?: string;
 
   assetKey = '';
 
-  constructor(
-    public readonly props: LocaleInjectionProps,
-    opts?: Partial<EventsDelegatorOptions>,
-  ) {
-    super(opts);
+  constructor(props: LocaleInjectionProps) {
+    super(props);
     this.locale = props.locale;
     this.register('prepareAssets').register('asset');
     this.debug(`constructor with locale '${this.locale}'`);
   }
 
   get baseUrl() {
-    return this.props.baseUrl || localeConfig('baseUrl');
+    return this.options.baseUrl || localeConfig('baseUrl');
   }
 
   prepareAssets = ({

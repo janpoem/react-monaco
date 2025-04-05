@@ -12,8 +12,7 @@ export type MonacoLocaleDeclaration = {
   name: string;
 };
 
-export type LocaleInjectionProps = {
+export type LocaleInjectionProps = EventsDelegatorOptions & {
   baseUrl?: string | URL;
   locale?: string;
-  debug?: EventsDelegatorOptions['debug'];
 };
