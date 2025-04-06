@@ -89,5 +89,6 @@ sync({
     path: 'react-monaco-demo',
     onError: console.error,
   }),
+  confirm: true,
   onChangeFiles: (files) => initManifest(files),
 }).catch(console.error);
