@@ -27,7 +27,7 @@ export enum EventsDebug {
 }
 
 export type EventsDelegatorOptions = {
-  debug: boolean | EventsDebug | number;
+  debug?: boolean | EventsDebug | number;
   [key: string]: unknown;
 };
 
