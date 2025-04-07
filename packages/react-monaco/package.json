@@ -1,6 +1,6 @@
 {
   "name": "@react-monaco/core",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A hook for load remote resources in react.",
   "author": "Jiankai Zeng <janpoem@163.com>",
   "license": "MIT",
@@ -49,9 +49,9 @@
   },
   "dependencies": {
     "@emotion/css": "^11.13.5",
+    "@zenstone/use-remote-loader": "workspace:*",
     "@zenstone/preset-provider": "workspace:*",
     "@zenstone/ts-utils": "^0.0.12",
-    "@zenstone/use-remote-loader": "workspace:*",
     "emittery": "^1.1.0",
     "just-compare": "^2.3.0",
     "react": "^19.0.0",
@@ -62,6 +62,9 @@
     "monaco-editor": "^0.52.2"
   },
   "peerDependencies": {
-    "react": "^18.0.0 || ^19.0.0"
+    "react": "^18.0.0 || ^19.0.0",
+    "@zenstone/ts-utils": "^0.0.12",
+    "@zenstone/preset-provider": "^1.0.1",
+    "@zenstone/use-remote-loader": "^1.0.1"
   }
 }
