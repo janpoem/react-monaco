@@ -64,9 +64,9 @@
     },
     "packages/plugin-locale": {
       "name": "@react-monaco/plugin-locale",
-      "version": "1.0.2",
+      "version": "1.0.7",
       "dependencies": {
-        "@react-monaco/core": "workspace:*",
+        "@react-monaco/core": "workspace:^",
         "@zenstone/ts-utils": "^0.0.12",
         "react": "^19.0.0",
       },
@@ -80,9 +80,9 @@
     },
     "packages/plugin-textmate": {
       "name": "@react-monaco/plugin-textmate",
-      "version": "1.0.2",
+      "version": "1.0.4",
       "dependencies": {
-        "@react-monaco/core": "workspace:*",
+        "@react-monaco/core": "workspace:^",
         "react": "^19.0.0",
         "vscode-oniguruma": "^2.0.1",
         "vscode-textmate": "^9.2.0",
@@ -97,9 +97,9 @@
     },
     "packages/plugin-themes": {
       "name": "@react-monaco/plugin-themes",
-      "version": "1.0.2",
+      "version": "1.0.4",
       "dependencies": {
-        "@react-monaco/core": "workspace:*",
+        "@react-monaco/core": "workspace:^",
         "@zenstone/ts-utils": "^0.0.12",
         "react": "^19.0.0",
       },
@@ -126,12 +126,12 @@
     },
     "packages/react-monaco": {
       "name": "@react-monaco/core",
-      "version": "1.0.2",
+      "version": "1.0.5",
       "dependencies": {
         "@emotion/css": "^11.13.5",
-        "@zenstone/preset-provider": "workspace:*",
+        "@zenstone/preset-provider": "workspace:^",
         "@zenstone/ts-utils": "^0.0.12",
-        "@zenstone/use-remote-loader": "workspace:*",
+        "@zenstone/use-remote-loader": "workspace:^",
         "emittery": "^1.1.0",
         "just-compare": "^2.3.0",
         "react": "^19.0.0",
