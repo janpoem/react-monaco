@@ -12,7 +12,6 @@
         "@semver-sync/sync": "^1.0.3",
         "@types/bun": "latest",
         "@types/semver": "^7.7.0",
-        "@zenstone/ts-utils": "^0.0.11",
         "ansi-colors": "^4.1.3",
         "dayjs": "^1.11.13",
         "glob": "^11.0.1",
@@ -33,7 +32,7 @@
     },
     "packages/demo": {
       "name": "@react-monaco/demo",
-      "version": "0.1.5",
+      "version": "0.1.6",
       "dependencies": {
         "@emotion/css": "^11.13.5",
         "@emotion/react": "^11.14.0",
@@ -65,7 +64,7 @@
     },
     "packages/plugin-locale": {
       "name": "@react-monaco/plugin-locale",
-      "version": "1.0.0",
+      "version": "1.0.2",
       "dependencies": {
         "@react-monaco/core": "workspace:*",
         "@zenstone/ts-utils": "^0.0.12",
@@ -81,7 +80,7 @@
     },
     "packages/plugin-textmate": {
       "name": "@react-monaco/plugin-textmate",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "dependencies": {
         "@react-monaco/core": "workspace:*",
         "react": "^19.0.0",
@@ -98,7 +97,7 @@
     },
     "packages/plugin-themes": {
       "name": "@react-monaco/plugin-themes",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "dependencies": {
         "@react-monaco/core": "workspace:*",
         "@zenstone/ts-utils": "^0.0.12",
@@ -114,7 +113,7 @@
     },
     "packages/preset-provider": {
       "name": "@zenstone/preset-provider",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "dependencies": {
         "react": "^19.0.0",
       },
@@ -127,7 +126,7 @@
     },
     "packages/react-monaco": {
       "name": "@react-monaco/core",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "dependencies": {
         "@emotion/css": "^11.13.5",
         "@zenstone/preset-provider": "workspace:*",
@@ -338,7 +337,7 @@
 
     "@rollup/rollup-win32-x64-msvc": ["@rollup/rollup-win32-x64-msvc@4.39.0", "", { "os": "win32", "cpu": "x64" }, "sha512-yAkUOkIKZlK5dl7u6dg897doBgLXmUHhIINM2c+sND3DZwnrdQkkSiDh7N75Ll4mM4dxSkYfXqU9fW3lLkMFug=="],
 
-    "@rsbuild/core": ["@rsbuild/core@1.3.3", "", { "dependencies": { "@rspack/core": "1.3.2", "@rspack/lite-tapable": "~1.0.1", "@swc/helpers": "^0.5.15", "core-js": "~3.41.0", "jiti": "^2.4.2" }, "bin": { "rsbuild": "bin/rsbuild.js" } }, "sha512-1w/bvE6cVOYS7EMv7TI5i5BimDoqEt2T5nN89tC/BgouAnt1xKD0PeXKtuT9OE3xwuGt2iH1WEPLZz89b7tGcg=="],
+    "@rsbuild/core": ["@rsbuild/core@1.3.4", "", { "dependencies": { "@rspack/core": "1.3.2", "@rspack/lite-tapable": "~1.0.1", "@swc/helpers": "^0.5.15", "core-js": "~3.41.0", "jiti": "^2.4.2" }, "bin": { "rsbuild": "bin/rsbuild.js" } }, "sha512-aYf56HZDkwhVicCeItFNjsEQSZC51X1yi01xBV4naNVCKUMxBAOriJyXZPdlHRntSvRQe1BjCao9cvXevwsRbw=="],
 
     "@rsbuild/plugin-react": ["@rsbuild/plugin-react@1.1.1", "", { "dependencies": { "@rspack/plugin-react-refresh": "~1.0.1", "react-refresh": "^0.16.0" }, "peerDependencies": { "@rsbuild/core": "1.x" } }, "sha512-gkATKrOQauXMMtrYA5jbTQkhmYTE0VXoknPLtVpiXtwDbBUwgX23LFf1XJ51YOwqYpP7g5SfPEMgD2FENtCq0A=="],
 
@@ -430,7 +429,7 @@
 
     "@zenstone/preset-provider": ["@zenstone/preset-provider@workspace:packages/preset-provider"],
 
-    "@zenstone/ts-utils": ["@zenstone/ts-utils@0.0.11", "", { "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-SdQXXVGoHVKvPecIFwyh/4X24/TtLjWqjvJAegBhLOEn650NYzKF78we9YURaO5SusbmBkXG0x1x0vyYtRPgHg=="],
+    "@zenstone/ts-utils": ["@zenstone/ts-utils@0.0.12", "", { "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-Y8K9tTgR/Xx/qZiBiMLB0VFnDRfdCFWYYgoMQT5IgsB/HSNaNd9g83a88sHaoKDmEAY0815HkA5w7sE1kObBXA=="],
 
     "@zenstone/use-remote-loader": ["@zenstone/use-remote-loader@workspace:packages/use-remote-loader"],
 
@@ -680,21 +679,11 @@
 
     "yaml": ["yaml@1.10.2", "", {}, "sha512-r3vXyErRCYJ7wg28yvBY5VSoAF8ZvlcW9/BwUzEtUsjvX/DKs24dIkuwjtuprwJJHsbyUbLApepYTR1BN4uHrg=="],
 
-    "@react-monaco/core/@zenstone/ts-utils": ["@zenstone/ts-utils@0.0.12", "", { "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-Y8K9tTgR/Xx/qZiBiMLB0VFnDRfdCFWYYgoMQT5IgsB/HSNaNd9g83a88sHaoKDmEAY0815HkA5w7sE1kObBXA=="],
-
-    "@react-monaco/demo/@zenstone/ts-utils": ["@zenstone/ts-utils@0.0.12", "", { "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-Y8K9tTgR/Xx/qZiBiMLB0VFnDRfdCFWYYgoMQT5IgsB/HSNaNd9g83a88sHaoKDmEAY0815HkA5w7sE1kObBXA=="],
-
-    "@react-monaco/plugin-locale/@zenstone/ts-utils": ["@zenstone/ts-utils@0.0.12", "", { "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-Y8K9tTgR/Xx/qZiBiMLB0VFnDRfdCFWYYgoMQT5IgsB/HSNaNd9g83a88sHaoKDmEAY0815HkA5w7sE1kObBXA=="],
-
-    "@react-monaco/plugin-themes/@zenstone/ts-utils": ["@zenstone/ts-utils@0.0.12", "", { "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-Y8K9tTgR/Xx/qZiBiMLB0VFnDRfdCFWYYgoMQT5IgsB/HSNaNd9g83a88sHaoKDmEAY0815HkA5w7sE1kObBXA=="],
-
     "@semver-sync/store-github/@semver-sync/sync": ["@semver-sync/sync@1.0.1", "", { "dependencies": { "@zenstone/ts-utils": "^0.0.10", "ansi-colors": "^4.1.3", "filesize": "^10.1.6", "glob": "^11.0.1", "semver": "^7.7.1" } }, "sha512-cDxx0MYhTdzWxRb9c2f/JBV0+4P4eXS5t5jBX68a6cBFxnHG6be8xuFqOgRRk+1nymRWx65paiCw2nuJddgmFg=="],
 
     "@semver-sync/store-github/@zenstone/ts-utils": ["@zenstone/ts-utils@0.0.10", "", { "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-ZlLO6mJTg4gWoKXpC9Dgu3OmIe9FXscSvfGbAKyHsBgX9guZHyqLSJyO8HSg+u76XydYc7krB19IQPhpBc3K2A=="],
 
     "@semver-sync/sync/@zenstone/ts-utils": ["@zenstone/ts-utils@0.0.10", "", { "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-ZlLO6mJTg4gWoKXpC9Dgu3OmIe9FXscSvfGbAKyHsBgX9guZHyqLSJyO8HSg+u76XydYc7krB19IQPhpBc3K2A=="],
-
-    "@zenstone/use-remote-loader/@zenstone/ts-utils": ["@zenstone/ts-utils@0.0.12", "", { "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-Y8K9tTgR/Xx/qZiBiMLB0VFnDRfdCFWYYgoMQT5IgsB/HSNaNd9g83a88sHaoKDmEAY0815HkA5w7sE1kObBXA=="],
 
     "hoist-non-react-statics/react-is": ["react-is@16.13.1", "", {}, "sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ=="],
 
